@@ -154,39 +154,51 @@
             </p>
 
             <form id="QueryForm">
-            <label>
+            <div style="display: flex; align-items: center; gap: 0px;">
+                <label> Firmware Version. </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
-                Get Firmware Version
-            </label>
+                <label for="radioGetVersion"> Get </label>
+                <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
+                <label for="fwUpdate"> Update </label>                
+            </div>
             <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
             <br>
-
-
-            <label>
+            
+            <div style="display: flex; align-items: center; gap: 0px;">
+                <label> Board SN: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
-                Get Board Serial Number
-            </label>
+                <label for="radioGetInfoBoardSN"> Get </label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-00-..." id="radioSetInfoBoardSN">
+                <label for="radioSetInfoBoardSN"> Set </label>
+            </div>
             <input type="text" id="boardSN" style ="width: 50%;" placeholder="decoded response">
             <br>
 
-            <label>
+            <div style="display: flex; align-items: center; gap: 0px;">
+                <label> Machine SN: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
-                Get Machine Serial Number
-            </label>
+                <label for="radioGetInfoMachineSN"> Get </label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-01-..." id="radioSetInfoMachineSN">
+                <label for="radioSetInfoMachineSN"> Set </label>
+            </div>
             <input type="text" id="machineSN" style ="width: 50%;" placeholder="decoded response">
             <br>
-            
-            <label>
+            <div style="display: flex; align-items: center; gap: 0px;">
+                <label> BLE Name: </label> 
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
-                Get Bluetooth Low Energy Name
-            </label>
+                <label for="radioGetInfoBLEName"> Get </label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-02-..." id="radioSetInfoBLEName">
+                <label for="radioSetInfoBLEName"> Set </label>
+            </div>        
             <input type="text" id="bleName" style ="width: 50%;" placeholder="decoded response">
             <br>
-
-            <label>
+            <div style="display: flex; align-items: center; gap: 0px;">
+                <label> Parameter Ver.: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
-                Get Parameter Version
-            </label>
+                <label for="radioGetInfoParamVersion"> Get </label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-03-..." id="radioSetInfoParamVersion">
+                <label for="radioSetInfoParamVersion"> Set </label>
+            </div>
             <input type="text" id="paramVersion" style ="width: 50%;" placeholder="decoded response">
             <br>
             <br>
@@ -345,6 +357,10 @@
             <div id="log" class="log-area"></div>
         </div>
     </div>
+
+    
+    <script src="modbus_crc16.js"></script>
+    
 
     <script>
         // UUIDs from Python description
@@ -615,6 +631,78 @@
             }
         }
 
+        function querySetInfo (info_txt, id) {
+            log(`querySetInfo: Preparing to set info ID ${id} with text "${info_txt}"`, 'info');
+            const dataArray = new Uint8Array(7+ 0x21 + 2); // 7 byte header + 33 byte data + 2 byte CRC
+            // Header
+            dataArray[0] = 0xAA; // Start byte
+            dataArray[1] = 0x01; // Master Address (central)
+            dataArray[2] = 0x00; // Slave Address (peripheral)
+            dataArray[3] = 0x01; // Control code
+            dataArray[4] = 0x06; // Function code (Set Info)
+            dataArray[5] = 0x00; // Data length LSB (33 bytes)
+            dataArray[6] = 0x21; // Data length MSB
+            // Data
+            dataArray[7] = id; // information ID
+            // Fill info_txt into dataArray starting from index 8
+            if (info_txt.length > 0) {
+                log(`querySetInfo: info_txt length is ${info_txt.length}`, 'info');
+                if (id == 0x00) {
+                    const maxLength = 6;
+                    log(`querySetInfo: maxLength for ID 0x00 is ${maxLength}`, 'info');
+                } else if (id == 0x01) {
+                    const maxLength = 28;
+                    log(`querySetInfo: maxLength for ID 0x01 is ${maxLength}`, 'info');
+                } else if (id == 0x02) {
+                    const maxLength = 16;
+                    log(`querySetInfo: maxLength for ID 0x02 is ${maxLength}`, 'info');
+                } else if (id == 0x03) {
+                    const maxLength = 8;
+                    log(`querySetInfo: maxLength for ID 0x03 is ${maxLength}`, 'info');
+                } else {
+                    log('querySetInfo: id non valido', 'info');
+                    return null;
+                }
+                const encoder = new TextEncoder();
+                const utf8Bytes = encoder.encode(info_txt);
+                for (let i = 0; i < 32; i++) {
+                    // se inserisco la condizione i < maxLength, non funziona !!!!
+                    if (i < utf8Bytes.length) {
+                        dataArray[8 + i] = utf8Bytes[i];
+                    } else {
+                        dataArray[8 + i] = 0x00;
+                    }
+                }
+                /*
+                for (let i = 0; i < 32; i++) {
+                    if (i < maxLength) {
+                        dataArray[8 + i] = info_txt.charCodeAt(i) & 0xFF; // Fill with ASCII codes
+                    } else {
+                        dataArray[8 + i] = 0x00; // Pad with NUL if info_txt is shorter than 32 bytes
+                    }
+                }
+                */
+                log(`raw data array`, 'info');
+                log(`Data Array: 0x${Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
+                // Calculate CRC
+                const crc = CRC16(dataArray.slice(0, 7 + 0x21));
+                // Big Endian: MSB first
+                dataArray[7 + 0x21] = crc[0];   // CRC MSB
+                dataArray[7 + 0x21 + 1] = crc[1]; // CRC LSB
+                log(`querySetInfo: Prepared data for ID ${id} with info "${info_txt}"`, 'info');
+                log(`Data Array: 0x${Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
+                return Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-');
+            } else {
+                log('querySetInfo: info_txt is empty', 'info');
+                return null;
+            }
+        }
+
+        function queryUpdateFW () {
+            log('FW Update not implemented yet', 'info');
+            return 'queryUpdateFW not implemented yet';
+        }
+
         function updateInfoDataFields(dataArray) {
             const boardSN = document.getElementById('boardSN');
             const machineSN = document.getElementById('machineSN');
@@ -661,6 +749,8 @@
                 updateFWVersionDataFields(receivedData);
             } else if (receivedData[3] == 0x01 && receivedData[4] == 0x87) {
                 updateInfoDataFields(receivedData);
+            } else if (receivedData[3] == 0x01 && receivedData[4] == 0x86) {
+                log('Set Info ACK received', 'info');
             } else {
                 log('Dati ricevuti NON corrispondono al formato atteso control-function code', 'info');
             }
@@ -819,9 +909,30 @@
         disconnectButton.addEventListener('click', disconnectDevice);
         writeRxButton.addEventListener('click', () => writeToCharacteristic(rxCharacteristic, rxInput));
         queryForm.addEventListener('click', (event) => {
+            const boardSN = document.getElementById('boardSN');
+            const machineSN = document.getElementById('machineSN');
+            const bleName = document.getElementById('bleName');
+            const paramVersion = document.getElementById('paramVersion');
             if (event.target.name === 'sceltaQuery') {
-                rxInput.value = event.target.value;
-                query_infoID = event.target.id;
+                if ((event.target.id === 'radioGetStatus') || 
+                (event.target.id === 'radioGetVersion') || 
+                (event.target.id === 'radioGetInfoBoardSN') || 
+                (event.target.id === 'radioGetInfoMachineSN') || 
+                (event.target.id === 'radioGetInfoBLEName') || 
+                (event.target.id === 'radioGetInfoParamVersion')) {
+                    rxInput.value = event.target.value;
+                    query_infoID = event.target.id;
+                } else if (event.target.id === 'radioSetInfoBoardSN') {
+                    rxInput.value = querySetInfo(boardSN.value, 0x00);
+                } else if (event.target.id === 'radioSetInfoMachineSN') {
+                    rxInput.value = querySetInfo(machineSN.value, 0x01);
+                } else if (event.target.id === 'radioSetInfoBLEName') {
+                    rxInput.value = querySetInfo(bleName.value, 0x02);
+                } else if (event.target.id === 'radioSetInfoParamVersion') {
+                    rxInput.value = querySetInfo(paramVersion.value, 0x03);
+                } else if (event.target.id === 'fwUpdate') {
+                    rxInput.value = queryUpdateFW();
+                }
             }
         });
         chekboxPeriodicQuery.addEventListener('change', (event) => {
