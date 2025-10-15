@@ -135,36 +135,35 @@
             Con alcune macchine può essere richiesto il "pairing" da menù di sistema: <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
             <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i></p>
 
-        <div class="section">
+        <div class="section" style ="display: flex; text-align: center;">
             <!--
             <h2>Stato Connessione</h2>
             -->
-            <p class="status" id="connectionStatus">Disconnesso</p>
+            <p class="status" id="connectionStatus" style = "width: 20%;">Disconnesso</p>
             <button id="connectButton" class="primary">Connetti</button>
             <button id="disconnectButton" class="secondary" disabled>Disconnetti</button>
         </div>
 
-        <div class="section">
+        <fieldset id = "fieldsetQuery" class = "section" disabled>
             <!--
             <h2>Interazione con le Caratteristiche</h2>
-            -->
+            
             <p>
                 <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
                 <strong>Query:</strong>
             </p>
-
+            -->
             <form id="QueryForm">
-            <div style="display: flex; align-items: center; gap: 0px;">
-                <label> Firmware Version. </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
-                <label for="radioGetVersion"> Get </label>
-                <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
-                <label for="fwUpdate"> Update </label>                
-            </div>
-            <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
+                <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
+            <label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
+                Get Status
+                <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
+                Periodic Query
+            </label>
             <br>
-            
-            <div style="display: flex; align-items: center; gap: 0px;">
+                        
+            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                 <label> Board SN: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
                 <label for="radioGetInfoBoardSN"> Get </label>
@@ -174,7 +173,7 @@
             <input type="text" id="boardSN" style ="width: 50%;" placeholder="decoded response">
             <br>
 
-            <div style="display: flex; align-items: center; gap: 0px;">
+            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                 <label> Machine SN: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
                 <label for="radioGetInfoMachineSN"> Get </label>
@@ -183,7 +182,7 @@
             </div>
             <input type="text" id="machineSN" style ="width: 50%;" placeholder="decoded response">
             <br>
-            <div style="display: flex; align-items: center; gap: 0px;">
+            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                 <label> BLE Name: </label> 
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
                 <label for="radioGetInfoBLEName"> Get </label>
@@ -192,7 +191,7 @@
             </div>        
             <input type="text" id="bleName" style ="width: 50%;" placeholder="decoded response">
             <br>
-            <div style="display: flex; align-items: center; gap: 0px;">
+            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                 <label> Parameter Ver.: </label>
                 <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
                 <label for="radioGetInfoParamVersion"> Get </label>
@@ -203,15 +202,19 @@
             <br>
             <br>
 
+            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                <label> Firmware Version. </label>
+                <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
+                <label for="radioGetVersion"> Get </label>
+                <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
+                <label for="fwUpdate"> Update </label>               
+            </div>
+            <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
+            <br>
+            <input type="file" id="fileInput" style="width: 60%;" single accept=".bin">
+            <progress id="progressBar" value="0" max="100" style="width: 30%;"></progress>
+            <span id="progressText">0%</span>
 
-            <label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
-                Get Status
-                <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
-                Periodic Query
-            </label><br>
-
-            <hr>
 <!--
             <label>
                 <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
@@ -227,114 +230,104 @@
             <p>Get Info - BLE Name: AA-01-00-01-07-00-01-02-29-66</p>
             <p>Get Info - Parameter Version: AA-01-00-01-07-00-01-03-E9-A7</p>
 -->
+            <br>
             <input type="text" id="rxInput" placeholder="Query to send ...">
             <button id="writeRxButton" class="action" disabled> Send </button>
-
-            <p><strong>Response:</strong></p>
-            <!-- <div id="txValue" style="font-weight: bold; color: #007bff;">Attendendo dati...</div> -->
+            <!--<p><strong>Response:</strong></p>
+             <div id="txValue" style="font-weight: bold; color: #007bff;">Attendendo dati...</div> -->
             <div id="txValue" style="font-size: small; color: #007bff;">Response raw data ...</div>
+            <br>
 
-            <hr
+            <hr>
+            <form id="StatusForm">
+                <div class="campo-multiplo">
+                    <div class="input-group">
+                        <label for="systemState">System State:</label>
+                        <input type="text" id="systemState">
+                    </div>
 
-            <form>
-            <div class="campo-multiplo">
+                    <div class="input-group">
+                        <label for="cycleTimeDuration">Cycle time duration [s]:</label>
+                        <input type="text" id="cycleTimeDuration">
+                    </div>
 
-                <div class="input-group">
-                <label for="systemState">System State:</label>
-                <input type="text" id="systemState">
+                    <div class="input-group">
+                        <label for="cycleTimeElapsed"">Cycle time elapsed [s]:</label>
+                        <input type="text" id="cycleTimeElapsed">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="temperatureProbe">Probe Temp. [°C]:</label>
+                        <input type="text" id="temperatureProbe">
+                    </div>                
                 </div>
-
-                <div class="input-group">
-                <label for="cycleTimeDuration">Cycle time duration [s]:</label>
-                <input type="text" id="cycleTimeDuration">
-                </div>
-
-                <div class="input-group">
-                <label for="cycleTimeElapsed"">Cycle time elapsed [s]:</label>
-                <input type="text" id="cycleTimeElapsed">
-                </div>
-
-                <div class="input-group">
-                <label for="temperatureProbe">Probe Temp. [°C]:</label>
-                <input type="text" id="temperatureProbe">
-                </div>                
-
-            </div>
-
-            <div class="campo-multiplo">
-
-                <div class="input-group">
-                <label for="environmentTemp">Environment Temp. [°C]:</label>
-                <input type="text" id="environmentTemp">
-                </div>
-
-                <div class="input-group">
-                <label for="motorCurrent">Motor current [mA]:</label>
-                <input type="text" id="motorCurrent">
-                </div>
-
-                <div class="input-group">
-                <label for="peltierVoltage">TECs voltage [mV]:</label>
-                <input type="text" id="peltierVoltage">
-                </div>
-
-                <div class="input-group">
-                <label for="motorVoltage">Loads voltage [mV]:</label>
-                <input type="text" id="motorVoltage">
-                </div>                
-
-            </div>
-
-            <div class="campo-multiplo">
-
-                <div class="input-group">
-                <label for="motorFilteredCurrent">Motor filtered current [mA]:</label>
-                <input type="text" id="motorFilteredCurrent">
-                </div>
-
-                <div class="input-group">
-                <label for="motorDutyCycle">Motor duty cycle [%]:</label>
-                <input type="text" id="motorDutyCycle">
-                </div>
-
-                <div class="input-group">
-                <label for="motorRealVoltage">Motor voltage [mV]:</label>
-                <input type="text" id="motorRealVoltage">
-                </div>
-
-                <div class="input-group">
-                <label for="motorSpeed">Motor speed [rpm]:</label>
-                <input type="text" id="motorSpeed">
-                </div>                
-
-            </div>
 
                 <div class="campo-multiplo">
+                    <div class="input-group">
+                        <label for="environmentTemp">Environment Temp. [°C]:</label>
+                        <input type="text" id="environmentTemp">
+                    </div>
 
-                <div class="input-group">
-                <label for="motorSwitchPosition">Motor switch position:</label>
-                <input type="text" id="motorSwitchPosition">
+                    <div class="input-group">
+                        <label for="motorCurrent">Motor current [mA]:</label>
+                        <input type="text" id="motorCurrent">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="peltierVoltage">TECs voltage [mV]:</label>
+                        <input type="text" id="peltierVoltage">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="motorVoltage">Loads voltage [mV]:</label>
+                        <input type="text" id="motorVoltage">
+                    </div>                
                 </div>
 
-                <div class="input-group">
-                <label for="scannerConnected">Scanner connected:</label>
-                <input type="text" id="scannerConnected">
+                <div class="campo-multiplo">
+                    <div class="input-group">
+                        <label for="motorFilteredCurrent">Motor filtered current [mA]:</label>
+                        <input type="text" id="motorFilteredCurrent">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="motorDutyCycle">Motor duty cycle [%]:</label>
+                        <input type="text" id="motorDutyCycle">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="motorRealVoltage">Motor voltage [mV]:</label>
+                        <input type="text" id="motorRealVoltage">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="motorSpeed">Motor speed [rpm]:</label>
+                        <input type="text" id="motorSpeed">
+                    </div>                
                 </div>
 
-                <div class="input-group">
-                <label for="flavourCode">Flavour code:</label>
-                <input type="text" id="flavourCode">
+                <div class="campo-multiplo">
+                    <div class="input-group">
+                        <label for="motorSwitchPosition">Motor switch position:</label>
+                        <input type="text" id="motorSwitchPosition">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="scannerConnected">Scanner connected:</label>
+                        <input type="text" id="scannerConnected">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="flavourCode">Flavour code:</label>
+                        <input type="text" id="flavourCode">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="option">Option:</label>
+                        <input type="text" id="option">
+                    </div>                
                 </div>
-
-                <div class="input-group">
-                <label for="option">Option:</label>
-                <input type="text" id="option">
-                </div>                
-
-            </div>
-
             </form>
-            
             <!-- <p><em>(I dati ricevuti da XPRESS_TX appariranno qui automaticamente se il dispositivo li invia)</em></p>
 
             <hr>
@@ -347,7 +340,7 @@
             <p><em>(I cambiamenti di MODE via notifica appariranno qui automaticamente)</em></p>
             -->
 
-        </div>
+        </fieldset>
 
         <div class="section">
             <h2>
@@ -391,6 +384,7 @@
         const chekboxPeriodicQuery = document.getElementById('chekboxPeriodicQuery');
         // const readModeButton = document.getElementById('readModeButton');
         // const writeModeButton = document.getElementById('writeModeButton');
+        const fwFileInput = document.getElementById('fileInput');
         let rxInput = document.getElementById('rxInput');
         // const modeInput = document.getElementById('modeInput');
         const txValueDisplay = document.getElementById('txValue');
@@ -400,6 +394,8 @@
         
         let query_periodica = false;
         let query_infoID = '';
+        let ack_received = false;
+        let fw_dowloading = false;
 
         // --- Helper Functions ---
         function log(message, type = 'info') {
@@ -461,6 +457,7 @@
                 writeRxButton.disabled = false;
                 // readModeButton.disabled = false;
                 // writeModeButton.disabled = false;
+                document.getElementById('fieldsetQuery').disabled = false;
             } else {
                 connectionStatusDisplay.textContent = 'Disconnesso';
                 connectionStatusDisplay.className = 'status disconnected';
@@ -469,6 +466,7 @@
                 writeRxButton.disabled = true;
                 // readModeButton.disabled = true;
                 // writeModeButton.disabled = true;
+                document.getElementById('fieldsetQuery').disabled = true;
                 txValueDisplay.textContent = 'Response raw data...';
                 // modeValueDisplay.textContent = 'N/D';
             }
@@ -698,9 +696,145 @@
             }
         }
 
-        function queryUpdateFW () {
-            log('FW Update not implemented yet', 'info');
-            return 'queryUpdateFW not implemented yet';
+        // Funzione helper per il sleep
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function aggiornaProgress(percentuale) {
+            document.getElementById('progressBar').value = percentuale;
+            document.getElementById('progressText').textContent = percentuale + '%';
+        }
+
+        async function queryUpdateFW (fw) {
+            log('FW Update ...', 'info');
+    
+            const fw_size = fw.length;
+            log(`Firmware size in bytes: ${fw_size} `, 'info');
+
+            // Il file preparato in multipli di 128 bytes
+            const x = fw_size / 128;
+            const last_pkt_len = fw_size - 128 * Math.floor(x);  // con '0' padding
+
+            // File pronto per la programmazione
+            const padded_fw = new Uint8Array(fw_size + (128 - last_pkt_len));
+            padded_fw.set(fw);
+
+            let num_pkt;
+            if (last_pkt_len > 0) {
+                num_pkt = Math.floor(x) + 1;
+            } else {
+                num_pkt = Math.floor(x);
+            }
+
+            log(`Number of packets: ${num_pkt}`, 'info');
+            log(`Tempo stimato: ${num_pkt * 0.1} secondi`, 'info');
+            log(`File Heading: 0x${Array.from(fw.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
+            
+            // Start FW image download
+            ack_received = true;
+            const start_fw_image_download = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x00, 0x00, 0x06]);
+            if (ack_received === true) {
+                // Converti fw_size in 4 bytes big-endian
+                const fw_size_bytes = new Uint8Array([
+                    (fw_size >> 24) & 0xFF,
+                    (fw_size >> 16) & 0xFF,
+                    (fw_size >> 8) & 0xFF,
+                    fw_size & 0xFF
+                ]);
+                
+                // Converti num_pkt in 2 bytes big-endian
+                const num_pkt_bytes = new Uint8Array([
+                    (num_pkt >> 8) & 0xFF,
+                    num_pkt & 0xFF
+                ]);
+                
+                // Concatena gli array
+                let msg = new Uint8Array(start_fw_image_download.length + fw_size_bytes.length + num_pkt_bytes.length);
+                msg.set(start_fw_image_download);
+                msg.set(fw_size_bytes, start_fw_image_download.length);
+                msg.set(num_pkt_bytes, start_fw_image_download.length + fw_size_bytes.length);
+                
+                // Aggiungi CRC16
+                const crc = CRC16(msg);
+                const msgWithCrc = new Uint8Array(msg.length + crc.length);
+                msgWithCrc.set(msg);
+                msgWithCrc.set(crc, msg.length);
+                msg = msgWithCrc;
+                
+                ack_received = false;
+                await rxCharacteristic.writeValue(msg).then(() => {
+                    log('Start FW image download command sent', 'info');
+                }).catch(error => {
+                    log(`Error sending start FW image download command: ${error}`, 'info');
+                });
+
+            }
+            
+            // FW download cycle
+            fw_dowloading = true;
+            let i = 0;
+            const download_fw_image = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x01, 0x00, 0x82]);
+
+            while (i < num_pkt) {
+                if (ack_received === true) {
+                    const data = padded_fw.slice(i * 128, (i + 1) * 128);
+                    
+                    // Converti i in 2 bytes big-endian
+                    const i_bytes = new Uint8Array([
+                        (i >> 8) & 0xFF,
+                        i & 0xFF
+                    ]);
+                    
+                    // Concatena gli array
+                    let msg = new Uint8Array(download_fw_image.length + i_bytes.length + data.length);
+                    msg.set(download_fw_image);
+                    msg.set(i_bytes, download_fw_image.length);
+                    msg.set(data, download_fw_image.length + i_bytes.length);
+                    
+                    // Aggiungi CRC16
+                    const crc = CRC16(msg);
+                    const msgWithCrc = new Uint8Array(msg.length + crc.length);
+                    msgWithCrc.set(msg);
+                    msgWithCrc.set(crc, msg.length);
+                    msg = msgWithCrc;
+                    
+                    ack_received = false;
+                    await rxCharacteristic.writeValue(msg).then(() => {
+                        log(`Sent fw packet number: ${i}`, 'info');
+                    }).catch(error => {
+                        log(`Error sending start FW image download command: ${error}`, 'info');
+                    });
+                    i = i + 1;
+                }
+                await sleep(10);
+                aggiornaProgress(Math.floor((i / num_pkt) * 100));
+            }
+            await sleep(100);
+            fw_dowloading = false;
+
+            // FW install
+            if ((ack_received == true) && (i == num_pkt)) {
+                const install_fw_image = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x02, 0x00, 0x00]);
+                let msg = install_fw_image;
+                
+                // Aggiungi CRC16
+                const crc = CRC16(msg);
+                const msgWithCrc = new Uint8Array(msg.length + crc.length);
+                msgWithCrc.set(msg);
+                msgWithCrc.set(crc, msg.length);
+                msg = msgWithCrc;
+                
+                ack_received = false;
+                await rxCharacteristic.writeValue(msg).then(() => {
+                    log('Sent fw Install ... now flashing', 'info');
+                }).catch(error => {
+                    log(`Error sending start FW image download command: ${error}`, 'info');
+                });
+                await sleep(500);
+            } else {
+                log(`Anomalia last ACK: ${ack_received}, last PKT: ${i} / ${num_pkt}`, 'info');
+            }
         }
 
         function updateInfoDataFields(dataArray) {
@@ -738,11 +872,12 @@
             const decodedData = new TextDecoder().decode(receivedData); // Attempt to decode as text
             // displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')} (ASCII: "${decodedData}")`;
             displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')}`;
-            if (query_periodica == false) {
+            if ((query_periodica == false) && (fw_dowloading == false)) {
                 log(`Received notification from ${event.target.uuid}: ${decodedData} (Raw: ${receivedData})`);
             } else {
                 // formatted log status
             }
+
             if (receivedData[3] == 0x01 && receivedData[4] == 0x82) {
                 updateStatusDataFields(receivedData);
             } else if (receivedData[3] == 0x01 && receivedData[4] == 0x81) {
@@ -751,6 +886,15 @@
                 updateInfoDataFields(receivedData);
             } else if (receivedData[3] == 0x01 && receivedData[4] == 0x86) {
                 log('Set Info ACK received', 'info');
+            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x80) {
+                log('Start FW dowload ACK received', 'info');
+                ack_received = true;
+            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x81) {
+                // log('FW download ACK received', 'info');
+                ack_received = true;
+            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x82) {
+                log('FW Install ACK received', 'info');
+                ack_received = true;
             } else {
                 log('Dati ricevuti NON corrispondono al formato atteso control-function code', 'info');
             }
@@ -931,7 +1075,7 @@
                 } else if (event.target.id === 'radioSetInfoParamVersion') {
                     rxInput.value = querySetInfo(paramVersion.value, 0x03);
                 } else if (event.target.id === 'fwUpdate') {
-                    rxInput.value = queryUpdateFW();
+                    rxInput.value = 'FW Update selected. Choose a file.'; // Placeholder
                 }
             }
         });
@@ -959,6 +1103,23 @@
                 
             }
         });
+        
+        fwFileInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                log(`File selezionato per l'aggiornamento firmware: ${file.name} (${file.size} bytes)`, 'info');
+                // Implement firmware update logic if needed
+                const arrayBuffer = await file.arrayBuffer();
+                const fw_uint8Array = new Uint8Array(arrayBuffer);
+                log(`Contenuto del file (primi 64 bytes): 0x${Array.from(fw_uint8Array.slice(0, 64)).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
+                // Further processing of the firmware file can be done here
+                queryUpdateFW(fw_uint8Array);
+            } else {
+                log('Nessun file selezionato.', 'info');
+            }
+        });
+
+
         // readModeButton.addEventListener('click', () => readCharacteristic(modeCharacteristic, modeValueDisplay));
         // writeModeButton.addEventListener('click', () => writeToCharacteristic(modeCharacteristic, modeInput));
 
