@@ -131,9 +131,10 @@
             BLE Monitor
         </h1>
         <p style = "font-size: small;"><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina. Assicurati 
-            di utilizzare un browser compatibile (es. Chrome) e che il Bluetooth sia abilitato. 
-            Con alcune macchine può essere richiesto il "pairing" da menù di sistema: <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
-            <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i></p>
+            di utilizzare un browser compatibile (es. Chrome) e che il Bluetooth sia abilitato.
+            Le macchine TooA Milano devono avere il firmware aggiornato alla versione più recente (bonding abilitato).
+            Alla prima connessione tra il dispositivo e la macchina è richiesto il "pairing" da menù di sistema, ad esempio in Windows: <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
+            <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i>, prima di premere il pulsante "Connetti"</p>
 
         <div class="section" style ="display: flex; text-align: center;">
             <!--
@@ -768,8 +769,8 @@
                 }).catch(error => {
                     log(`Error sending start FW image download command: ${error}`, 'info');
                 });
-
             }
+            await sleep(10);
             
             // FW download cycle
             fw_dowloading = true;
