@@ -3,126 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xpress Streaming Service - Web Bluetooth App</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h1, h2 {
-            color: #0056b3;
-        }
-        label {
-            display: block;
-            width: 100%;
-            font-size: small;
-            padding-left: 10px;
-        }
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-        }
-        button.primary {
-            background-color: #007bff;
-            color: white;
-        }
-        button.primary:hover {
-            background-color: #0056b3;
-        }
-        button.secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        button.secondary:hover {
-            background-color: #5a6268;
-        }
-        button.action {
-            background-color: #28a745;
-            color: white;
-        }
-        button.action:hover {
-            background-color: #218838;
-        }
-        input[type="text"] {
-            padding: 8px;
-            margin: 5px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: calc(100% - 130px); /* Adjust width considering button */;
-            box-sizing: border-box;
-        }
-        input[type="radio"] {
-            margin-top: -1px;
-            vertical-align: middle;
-        }
-        input[type="checkbox"] {
-            margin-top: 0px;
-            vertical-align: middle;
-        }
-        .section {
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            background-color: #fafafa;
-        }
-        .log-area {
-            background-color: #e9ecef;
-            border: 1px solid #ced4da;
-            padding: 10px;
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-x: scroll;
-            overflow-y: auto;
-            font-family: monospace;
-            white-space: pre-wrap; /* nowrap */
-            word-break: break-all;
-            border-radius: 4px;
-            line-height: 1.0;
-        }
-        .status {
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .status.connected { color: green; }
-        .status.disconnected { color: red; }
+    <title>TooA BLE Monitor - Web Bluetooth App</title>
+    
+    <link rel="stylesheet" href="ble-mon-r2.css">
 
-        /* Contenitore principale (Flex) */
-        .campo-multiplo {
-            display: flex;         /* Attiva il layout Flexbox */
-            gap: 20px;             /* Spazio tra i vari gruppi di input */
-            align-items: flex-end; /* Allinea gli input in basso, utile se le label hanno altezze diverse */
-        }
-
-        /* Ogni singolo gruppo Label + Input */
-        .input-group {
-            flex-grow: 1;          /* Fa in modo che ogni gruppo occupi uno spazio equo */
-            display: flex;         /* Usa Flexbox anche per allineare Label e Input verticalmente (opzionale) */
-            flex-direction: column; /* Imposta Label sopra Input */
-        }
-
-        /* Stile per gli input (textbox) */
-        .input-group input[type="text"] {
-            width: 100%;           /* Fa in modo che la textbox occupi tutto lo spazio disponibile nel suo gruppo */
-            padding: 8px;
-            box-sizing: border-box; /* Importante: padding e bordo inclusi nella larghezza */
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -137,109 +21,88 @@
             <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i>, prima di premere il pulsante "Connetti"</p>
 
         <div class="section" style ="display: flex; text-align: center;">
-            <!--
-            <h2>Stato Connessione</h2>
-            -->
             <p class="status" id="connectionStatus" style = "width: 20%;">Disconnesso</p>
             <button id="connectButton" class="primary">Connetti</button>
             <button id="disconnectButton" class="secondary" disabled>Disconnetti</button>
         </div>
 
         <fieldset id = "fieldsetQuery" class = "section" disabled>
-            <!--
-            <h2>Interazione con le Caratteristiche</h2>
-            
-            <p>
-                <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
-                <strong>Query:</strong>
-            </p>
-            -->
             <form id="QueryForm">
+
                 <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
-            <label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
-                Get Status
-                <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
-                Periodic Query
-            </label>
-            <br>
+                <label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
+                    Get Status
+                    <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
+                    Periodic Query
+                </label>
+                <br>
                         
-            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                <label> Board SN: </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
-                <label for="radioGetInfoBoardSN"> Get </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-00-..." id="radioSetInfoBoardSN">
-                <label for="radioSetInfoBoardSN"> Set </label>
-            </div>
-            <input type="text" id="boardSN" style ="width: 50%;" placeholder="decoded response">
-            <br>
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <label> Board SN: </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
+                    <label for="radioGetInfoBoardSN"> Get </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-00-..." id="radioSetInfoBoardSN">
+                    <label for="radioSetInfoBoardSN"> Set </label>
+                </div>
+                <input type="text" id="boardSN" style ="width: 50%;" placeholder="decoded response">
+                <br>
 
-            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                <label> Machine SN: </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
-                <label for="radioGetInfoMachineSN"> Get </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-01-..." id="radioSetInfoMachineSN">
-                <label for="radioSetInfoMachineSN"> Set </label>
-            </div>
-            <input type="text" id="machineSN" style ="width: 50%;" placeholder="decoded response">
-            <br>
-            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                <label> BLE Name: </label> 
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
-                <label for="radioGetInfoBLEName"> Get </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-02-..." id="radioSetInfoBLEName">
-                <label for="radioSetInfoBLEName"> Set </label>
-            </div>        
-            <input type="text" id="bleName" style ="width: 50%;" placeholder="decoded response">
-            <br>
-            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                <label> Parameter Ver.: </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
-                <label for="radioGetInfoParamVersion"> Get </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-03-..." id="radioSetInfoParamVersion">
-                <label for="radioSetInfoParamVersion"> Set </label>
-            </div>
-            <input type="text" id="paramVersion" style ="width: 50%;" placeholder="decoded response">
-            <br>
-            <br>
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <label> Machine SN: </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
+                    <label for="radioGetInfoMachineSN"> Get </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-01-..." id="radioSetInfoMachineSN">
+                    <label for="radioSetInfoMachineSN"> Set </label>
+                </div>
+                <input type="text" id="machineSN" style ="width: 50%;" placeholder="decoded response">
+                <br>
 
-            <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                <label> Firmware Version. </label>
-                <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
-                <label for="radioGetVersion"> Get </label>
-                <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
-                <label for="fwUpdate"> Update </label>               
-            </div>
-            <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
-            <br>
-            <input type="file" id="fileInput" style="width: 60%;" single accept=".bin">
-            <progress id="progressBar" value="0" max="100" style="width: 30%;"></progress>
-            <span id="progressText">0%</span>
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <label> BLE Name: </label> 
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
+                    <label for="radioGetInfoBLEName"> Get </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-02-..." id="radioSetInfoBLEName">
+                    <label for="radioSetInfoBLEName"> Set </label>
+                </div>        
+                <input type="text" id="bleName" style ="width: 50%;" placeholder="decoded response">
+                <br>
 
-<!--
-            <label>
-                <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
-                Periodic Query
-            </label>
--->
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <label> Parameter Ver.: </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
+                    <label for="radioGetInfoParamVersion"> Get </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-03-..." id="radioSetInfoParamVersion">
+                    <label for="radioSetInfoParamVersion"> Set </label>
+                </div>
+                <input type="text" id="paramVersion" style ="width: 50%;" placeholder="decoded response">
+                <br>
+                <br>
+
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <label> Firmware Version. </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
+                    <label for="radioGetVersion"> Get </label>
+                    <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
+                    <label for="fwUpdate"> Update </label>               
+                </div>
+                <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
+                <br>
+                <input type="file" id="fileInput" style="width: 60%;" single accept=".bin">
+                <progress id="progressBar" value="0" max="100" style="width: 30%;"></progress>
+                <span id="progressText">0%</span>
+
             </form> 
-<!--
-            <p>Get Version: AA-01-00-01-01-00-00-E7-40</p>
-            <p>Get Status: AA-01-00-01-02-00-00-E7-B0</p>
-            <p>Get Info - Board SN: AA-01-00-01-07-00-01-00-E8-E7</p>
-            <p>Get Info - Machine SN: AA-01-00-01-07-00-01-01-28-26</p>
-            <p>Get Info - BLE Name: AA-01-00-01-07-00-01-02-29-66</p>
-            <p>Get Info - Parameter Version: AA-01-00-01-07-00-01-03-E9-A7</p>
--->
+
             <br>
+
             <input type="text" id="rxInput" placeholder="Query to send ...">
             <button id="writeRxButton" class="action" disabled> Send </button>
-            <!--<p><strong>Response:</strong></p>
-             <div id="txValue" style="font-weight: bold; color: #007bff;">Attendendo dati...</div> -->
             <div id="txValue" style="font-size: small; color: #007bff;">Response raw data ...</div>
-            <br>
 
+            <br>
             <hr>
+
             <form id="StatusForm">
                 <div class="campo-multiplo">
                     <div class="input-group">
@@ -329,18 +192,6 @@
                     </div>                
                 </div>
             </form>
-            <!-- <p><em>(I dati ricevuti da XPRESS_TX appariranno qui automaticamente se il dispositivo li invia)</em></p>
-
-            <hr>
-
-            <p><strong>XPRESS_MODE (Leggi/Scrivi Modalità):</strong></p>
-            <input type="text" id="modeInput" placeholder="Inserisci valore per MODE">
-            <button id="readModeButton" class="action" disabled>Leggi MODE</button>
-            <button id="writeModeButton" class="action" disabled>Scrivi su MODE</button>
-            <p>Valore attuale di MODE: <span id="modeValue" style="font-weight: bold; color: #007bff;">N/D</span></p>
-            <p><em>(I cambiamenti di MODE via notifica appariranno qui automaticamente)</em></p>
-            -->
-
         </fieldset>
 
         <div class="section">
@@ -352,782 +203,9 @@
         </div>
     </div>
 
-    
     <script src="modbus_crc16.js"></script>
-    
+    <script src="XPress-ble.js"> </script>
+    <script src="ble-mon-r2.js"> </script>
 
-    <script>
-        // UUIDs from Python description
-        const XPRESS_SERVICE_UUID = '331a36f5-2459-45ea-9d95-6142f0c4b307';
-        const XPRESS_TX_CHARACTERISTIC_UUID = 'a73e9a10-628f-4494-a099-12efaf72258f';
-        const XPRESS_RX_CHARACTERISTIC_UUID = 'a9da6040-0823-4995-94ec-9ce41ca28833';
-        // const XPRESS_MODE_CHARACTERISTIC_UUID = '75a9f022-af03-4e41-b4bc-9de90a47d50b';
-
-        // Global variables for Bluetooth objects
-        let device;
-        let xpressService;
-        let txCharacteristic;
-        let rxCharacteristic;
-        let periodicQueryInterval = null;
-        // let modeCharacteristic;
-
-        // UI Elements
-        const connectButton = document.getElementById('connectButton');
-        const disconnectButton = document.getElementById('disconnectButton');
-        const writeRxButton = document.getElementById('writeRxButton');
-        const queryForm = document.getElementById('QueryForm');
-        const radioGetVersion = document.getElementById('radioGetVersion');
-        const radioGetInfoBoardSN = document.getElementById('radioGetInfoBoardSN');
-        const radioGetInfoMachineSN = document.getElementById('radioGetInfoMachineSN');
-        const radioGetInfoBLEName = document.getElementById('radioGetInfoBLEName');
-        const radioGetInfoParamVersion = document.getElementById('radioGetInfoParamVersion');
-        const radioGetStatus = document.getElementById('radioGetStatus');
-        const chekboxPeriodicQuery = document.getElementById('chekboxPeriodicQuery');
-        // const readModeButton = document.getElementById('readModeButton');
-        // const writeModeButton = document.getElementById('writeModeButton');
-        const fwFileInput = document.getElementById('fileInput');
-        let rxInput = document.getElementById('rxInput');
-        // const modeInput = document.getElementById('modeInput');
-        const txValueDisplay = document.getElementById('txValue');
-        // const modeValueDisplay = document.getElementById('modeValue');
-        const connectionStatusDisplay = document.getElementById('connectionStatus');
-        const logDiv = document.getElementById('log');
-        
-        let query_periodica = false;
-        let query_infoID = '';
-        let ack_received = false;
-        let fw_dowloading = false;
-
-        // --- Helper Functions ---
-        function log(message, type = 'info') {
-            if (type == 'info') {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString();
-                logDiv.innerHTML += `<p><strong>[${timeString}]</strong> ${message}</p>`;
-                logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
-            } else if (type == 'monitor') {
-                // logDiv.innerHTML += `<p>${message}</p>`;
-                logDiv.innerHTML += `${message}\r\n`;
-                logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
-            }
-            console.log(message);
-        }
-
-        function scaricaLog() {
-            // 1. Ottieni l'elemento HTML del log
-            const logDiv = document.getElementById('log'); // Assicurati che l'ID sia corretto!
-            
-            if (!logDiv) {
-                log("Elemento log-area non trovato!", 'info');
-                return;
-            }
-
-            // 2. Estrai il contenuto testuale
-            // Ottenere innerText è meglio di innerHTML per estrarre solo il testo visibile
-            let contenutoLog = logDiv.innerText;
-
-            // 3. Crea un oggetto Blob con il contenuto testuale
-            // 'text/plain' è il MIME type per i file di testo
-            const blob = new Blob([contenutoLog], { type: 'text/plain' });
-
-            // 4. Crea un URL per il Blob
-            const url = URL.createObjectURL(blob);
-
-            // 5. Crea un elemento link (virtuale) per innescare il download
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'log_data_' + new Date().toISOString().slice(0, 10) + '.txt'; // Nome del file
-            
-            // 6. Simula il click sul link per avviare il download
-            document.body.appendChild(a); // Aggiungi il link al DOM (necessario per Firefox)
-            a.click();
-            
-            // 7. Pulisci: rimuovi il link e revoca l'URL del Blob
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            log("Log scaricato con successo!", 'info');
-        }
-
-        function updateConnectionStatus(isConnected) {
-            if (isConnected) {
-                connectionStatusDisplay.textContent = 'Connesso';
-                connectionStatusDisplay.className = 'status connected';
-                connectButton.disabled = true;
-                disconnectButton.disabled = false;
-                writeRxButton.disabled = false;
-                // readModeButton.disabled = false;
-                // writeModeButton.disabled = false;
-                document.getElementById('fieldsetQuery').disabled = false;
-            } else {
-                connectionStatusDisplay.textContent = 'Disconnesso';
-                connectionStatusDisplay.className = 'status disconnected';
-                connectButton.disabled = false;
-                disconnectButton.disabled = true;
-                writeRxButton.disabled = true;
-                // readModeButton.disabled = true;
-                // writeModeButton.disabled = true;
-                document.getElementById('fieldsetQuery').disabled = true;
-                txValueDisplay.textContent = 'Response raw data...';
-                // modeValueDisplay.textContent = 'N/D';
-            }
-        }
-
-        function clearDataFields() {
-            const fields = [
-                'systemState', 'cycleTimeDuration', 'cycleTimeElapsed', 'temperatureProbe',
-                'environmentTemp', 'motorCurrent', 'peltierVoltage', 'motorVoltage',
-                'motorFilteredCurrent', 'motorDutyCycle', 'motorRealVoltage', 'motorSpeed',
-                'motorSwitchPosition', 'scannerConnected', 'flavourCode', 'option'
-            ];
-            fields.forEach(fieldId => {
-                const field = document.getElementById(fieldId);
-                if (field) {
-                    field.value = '';
-                }
-            });
-        }
-
-        /**
-         * Converte due byte consecutivi da un ArrayBuffer o TypedArray in un intero a 16 bit.
-         * @param {Uint8Array} dataArray - Il TypedArray contenente i dati.
-         * @param {number} offset - La posizione (indice) del primo byte da leggere (il byte più significativo se big-endian, o meno significativo se little-endian).
-         * @param {boolean} isLittleEndian - Se TRUE, usa l'ordine little-endian. Altrimenti, usa big-endian.
-         * @returns {number} L'intero a 16 bit convertito.
-         */
-        function bytesToSInt(dataArray, offset, size, isLittleEndian = true) {
-            let shortInt;
-            // 1. Assicurati di avere un ArrayBuffer (necessario per DataView)
-            // Se dataArray è un Uint8Array, .buffer e .byteOffset sono i suoi riferimenti.
-            const buffer = dataArray.buffer;
-            const arrayOffset = dataArray.byteOffset + offset; // L'offset nell'ArrayBuffer completo
-
-            // 2. Crea un DataView per leggere i dati binari
-            const dataView = new DataView(buffer, arrayOffset, size); // Leggi size byte
-
-            // 3. Usa getInt8/16/32 per leggere l'intero con segno a 16 bit
-            // L'ultimo argomento specifica l'endianness.
-            if (size == 1) {
-                shortInt = dataView.getInt8(0);
-            } else if (size == 2)  {
-                shortInt = dataView.getInt16(0, isLittleEndian);
-            } else if (size == 4)  {
-                shortInt = dataView.getInt32(0, isLittleEndian);
-            }
-            else {
-                log(`bytesToSInt: size non valido (${size}). Deve essere 1, 2 o 4.`);
-                return null;
-            }
-            return shortInt;
-        }
-
-        function updateStatusDataFields(dataArray) {
-            const systemState = document.getElementById('systemState');
-            const cycleTimeDuration = document.getElementById('cycleTimeDuration');
-            const cycleTimeElapsed = document.getElementById('cycleTimeElapsed');
-            const temperatureProbe = document.getElementById('temperatureProbe');
-            const environmentTemp = document.getElementById('environmentTemp');
-            const motorCurrent = document.getElementById('motorCurrent');
-            const peltierVoltage = document.getElementById('peltierVoltage');
-            const motorVoltage = document.getElementById('motorVoltage');
-            const motorFilteredCurrent = document.getElementById('motorFilteredCurrent');
-            const motorDutyCycle = document.getElementById('motorDutyCycle');
-            const motorRealVoltage = document.getElementById('motorRealVoltage');
-            const motorSpeed = document.getElementById('motorSpeed');
-            const motorSwitchPosition = document.getElementById('motorSwitchPosition');
-            const scannerConnected = document.getElementById('scannerConnected');
-            const flavourCode = document.getElementById('flavourCode');
-            const option = document.getElementById('option');           
-            let strStatusMonitor = '';
-
-            if (dataArray[5] == 0x00 && dataArray[6] >= 0x22) { // 0x0022 == 34 <= data length <= 37 == 0x0025 bytes, false = Big-endian
-                // log('Dati ricevuti corrispondono al formato atteso per la versione (byte 5-6 == 0x0025)');
-                systemState.value = bytesToSInt(dataArray, 7, 1); // offset 0x00
-                strStatusMonitor += systemState.value;
-                strStatusMonitor += ';';
-                cycleTimeDuration.value = bytesToSInt(dataArray, 8, 4, false)/10;
-                strStatusMonitor += cycleTimeDuration.value;
-                strStatusMonitor += ';';
-                cycleTimeElapsed.value = bytesToSInt(dataArray, 12, 4, false)/10;
-                strStatusMonitor += cycleTimeElapsed.value;
-                strStatusMonitor += ';';
-                temperatureProbe.value = bytesToSInt(dataArray, 16, 2, false)/10;
-                strStatusMonitor += temperatureProbe.value;
-                strStatusMonitor += ';';
-                environmentTemp.value = bytesToSInt(dataArray, 18, 2, false)/10;
-                strStatusMonitor += environmentTemp.value;
-                strStatusMonitor += ';';
-                motorCurrent.value = bytesToSInt(dataArray, 20, 2, false);
-                strStatusMonitor += motorCurrent.value;
-                strStatusMonitor += ';';
-                peltierVoltage.value = bytesToSInt(dataArray, 22, 2, false);
-                strStatusMonitor += peltierVoltage.value;
-                strStatusMonitor += ';';
-                motorVoltage.value = bytesToSInt(dataArray, 24, 2, false);
-                strStatusMonitor += motorVoltage.value;
-                strStatusMonitor += ';';
-                motorFilteredCurrent.value = bytesToSInt(dataArray, 26, 2, false);
-                strStatusMonitor += motorFilteredCurrent.value;
-                strStatusMonitor += ';';
-                motorDutyCycle.value = bytesToSInt(dataArray, 28, 1);
-                strStatusMonitor += motorDutyCycle.value;
-                strStatusMonitor += ';';
-                motorRealVoltage.value = bytesToSInt(dataArray, 29, 2, false);
-                strStatusMonitor += motorRealVoltage.value;
-                strStatusMonitor += ';';
-                motorSpeed.value = bytesToSInt(dataArray, 31, 2, false);
-                strStatusMonitor += motorSpeed.value;
-                strStatusMonitor += ';';
-                motorSwitchPosition.value = bytesToSInt(dataArray, 37, 1);
-                strStatusMonitor += motorSwitchPosition.value;
-                strStatusMonitor += ';';
-                flavourCode.value = dataArray.slice(38, 41).map(b => String.fromCharCode(b)).join('');
-                strStatusMonitor += flavourCode.value;
-                strStatusMonitor += ';';
-                if (dataArray.length >= 42) {
-                    option.value = bytesToSInt(dataArray, 41, 1);
-                    strStatusMonitor += option.value;
-                    strStatusMonitor += ';';
-                }
-                if (dataArray.length >= 44) {
-                    scannerConnected.value = bytesToSInt(dataArray, 42, 2, false);
-                    strStatusMonitor += scannerConnected.value;
-                    strStatusMonitor += ';';
-                }
-                if (query_periodica == true) {
-                    log(strStatusMonitor,'monitor')
-                }
-            } else {
-                log('Dati ricevuti NON corrispondono al formato atteso per la versione (byte 5-6 != 0x0025)', 'info');
-                return;
-            }
-
-        }
-
-        function getStringFromData(dataArray, offset, length) {
-            // 1. Decodifica la porzione massima in una stringa
-            const decoder = new TextDecoder('ascii');
-            const fullString = decoder.decode(dataArray.slice(offset, length));
-            // 2. Trova e taglia la stringa al terminatore NUL
-            const nullIndex = fullString.indexOf('\0');
-            if (nullIndex !== -1) {
-                return fullString.substring(0, nullIndex);
-            } else {
-                return fullString;
-            }
-        }
-
-
-        function updateFWVersionDataFields(dataArray) {
-            const fwVersion = document.getElementById('fwVersion');
-            if (dataArray[5] == 0x00 && dataArray[6] == 0x10) { // data length 16 == 0x0010 bytes, false = Big-endian
-                log('Dati ricevuti corrispondono al formato atteso per la versione (byte 5-6 == 0x0010)');
-                // fwVersion.value = dataArray.slice(7, 7+16).map(b => String.fromCharCode(b)).join('');
-                fwVersion.value = getStringFromData(dataArray, 7, 31);
-            } else {
-                log('Dati ricevuti NON corrispondono al formato atteso per la versione (byte 5-6 != 0x0010)', 'info');
-                return;
-            }
-        }
-
-        function querySetInfo (info_txt, id) {
-            log(`querySetInfo: Preparing to set info ID ${id} with text "${info_txt}"`, 'info');
-            const dataArray = new Uint8Array(7+ 0x21 + 2); // 7 byte header + 33 byte data + 2 byte CRC
-            // Header
-            dataArray[0] = 0xAA; // Start byte
-            dataArray[1] = 0x01; // Master Address (central)
-            dataArray[2] = 0x00; // Slave Address (peripheral)
-            dataArray[3] = 0x01; // Control code
-            dataArray[4] = 0x06; // Function code (Set Info)
-            dataArray[5] = 0x00; // Data length LSB (33 bytes)
-            dataArray[6] = 0x21; // Data length MSB
-            // Data
-            dataArray[7] = id; // information ID
-            // Fill info_txt into dataArray starting from index 8
-            if (info_txt.length > 0) {
-                log(`querySetInfo: info_txt length is ${info_txt.length}`, 'info');
-                if (id == 0x00) {
-                    const maxLength = 6;
-                    log(`querySetInfo: maxLength for ID 0x00 is ${maxLength}`, 'info');
-                } else if (id == 0x01) {
-                    const maxLength = 28;
-                    log(`querySetInfo: maxLength for ID 0x01 is ${maxLength}`, 'info');
-                } else if (id == 0x02) {
-                    const maxLength = 16;
-                    log(`querySetInfo: maxLength for ID 0x02 is ${maxLength}`, 'info');
-                } else if (id == 0x03) {
-                    const maxLength = 8;
-                    log(`querySetInfo: maxLength for ID 0x03 is ${maxLength}`, 'info');
-                } else {
-                    log('querySetInfo: id non valido', 'info');
-                    return null;
-                }
-                const encoder = new TextEncoder();
-                const utf8Bytes = encoder.encode(info_txt);
-                for (let i = 0; i < 32; i++) {
-                    // se inserisco la condizione i < maxLength, non funziona !!!!
-                    if (i < utf8Bytes.length) {
-                        dataArray[8 + i] = utf8Bytes[i];
-                    } else {
-                        dataArray[8 + i] = 0x00;
-                    }
-                }
-                /*
-                for (let i = 0; i < 32; i++) {
-                    if (i < maxLength) {
-                        dataArray[8 + i] = info_txt.charCodeAt(i) & 0xFF; // Fill with ASCII codes
-                    } else {
-                        dataArray[8 + i] = 0x00; // Pad with NUL if info_txt is shorter than 32 bytes
-                    }
-                }
-                */
-                log(`raw data array`, 'info');
-                log(`Data Array: 0x${Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
-                // Calculate CRC
-                const crc = CRC16(dataArray.slice(0, 7 + 0x21));
-                // Big Endian: MSB first
-                dataArray[7 + 0x21] = crc[0];   // CRC MSB
-                dataArray[7 + 0x21 + 1] = crc[1]; // CRC LSB
-                log(`querySetInfo: Prepared data for ID ${id} with info "${info_txt}"`, 'info');
-                log(`Data Array: 0x${Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
-                return Array.from(dataArray).map(b => b.toString(16).padStart(2, '0')).join('-');
-            } else {
-                log('querySetInfo: info_txt is empty', 'info');
-                return null;
-            }
-        }
-
-        // Funzione helper per il sleep
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
-        function aggiornaProgress(percentuale) {
-            document.getElementById('progressBar').value = percentuale;
-            document.getElementById('progressText').textContent = percentuale + '%';
-        }
-
-        async function queryUpdateFW (fw) {
-            log('FW Update ...', 'info');
-    
-            const fw_size = fw.length;
-            log(`Firmware size in bytes: ${fw_size} `, 'info');
-
-            // Il file preparato in multipli di 128 bytes
-            const x = fw_size / 128;
-            const last_pkt_len = fw_size - 128 * Math.floor(x);  // con '0' padding
-
-            // File pronto per la programmazione
-            const padded_fw = new Uint8Array(fw_size + (128 - last_pkt_len));
-            padded_fw.set(fw);
-
-            let num_pkt;
-            if (last_pkt_len > 0) {
-                num_pkt = Math.floor(x) + 1;
-            } else {
-                num_pkt = Math.floor(x);
-            }
-
-            log(`Number of packets: ${num_pkt}`, 'info');
-            log(`Tempo stimato: ${num_pkt * 0.1} secondi`, 'info');
-            log(`File Heading: 0x${Array.from(fw.slice(0, 16)).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
-            
-            // Start FW image download
-            ack_received = true;
-            const start_fw_image_download = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x00, 0x00, 0x06]);
-            if (ack_received === true) {
-                // Converti fw_size in 4 bytes big-endian
-                const fw_size_bytes = new Uint8Array([
-                    (fw_size >> 24) & 0xFF,
-                    (fw_size >> 16) & 0xFF,
-                    (fw_size >> 8) & 0xFF,
-                    fw_size & 0xFF
-                ]);
-                
-                // Converti num_pkt in 2 bytes big-endian
-                const num_pkt_bytes = new Uint8Array([
-                    (num_pkt >> 8) & 0xFF,
-                    num_pkt & 0xFF
-                ]);
-                
-                // Concatena gli array
-                let msg = new Uint8Array(start_fw_image_download.length + fw_size_bytes.length + num_pkt_bytes.length);
-                msg.set(start_fw_image_download);
-                msg.set(fw_size_bytes, start_fw_image_download.length);
-                msg.set(num_pkt_bytes, start_fw_image_download.length + fw_size_bytes.length);
-                
-                // Aggiungi CRC16
-                const crc = CRC16(msg);
-                const msgWithCrc = new Uint8Array(msg.length + crc.length);
-                msgWithCrc.set(msg);
-                msgWithCrc.set(crc, msg.length);
-                msg = msgWithCrc;
-                
-                ack_received = false;
-                await rxCharacteristic.writeValue(msg).then(() => {
-                    log('Start FW image download command sent', 'info');
-                }).catch(error => {
-                    log(`Error sending start FW image download command: ${error}`, 'info');
-                });
-            }
-            await sleep(10);
-            
-            // FW download cycle
-            fw_dowloading = true;
-            let i = 0;
-            const download_fw_image = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x01, 0x00, 0x82]);
-
-            while (i < num_pkt) {
-                if (ack_received === true) {
-                    const data = padded_fw.slice(i * 128, (i + 1) * 128);
-                    
-                    // Converti i in 2 bytes big-endian
-                    const i_bytes = new Uint8Array([
-                        (i >> 8) & 0xFF,
-                        i & 0xFF
-                    ]);
-                    
-                    // Concatena gli array
-                    let msg = new Uint8Array(download_fw_image.length + i_bytes.length + data.length);
-                    msg.set(download_fw_image);
-                    msg.set(i_bytes, download_fw_image.length);
-                    msg.set(data, download_fw_image.length + i_bytes.length);
-                    
-                    // Aggiungi CRC16
-                    const crc = CRC16(msg);
-                    const msgWithCrc = new Uint8Array(msg.length + crc.length);
-                    msgWithCrc.set(msg);
-                    msgWithCrc.set(crc, msg.length);
-                    msg = msgWithCrc;
-                    
-                    ack_received = false;
-                    await rxCharacteristic.writeValue(msg).then(() => {
-                        log(`Sent fw packet number: ${i}`, 'info');
-                    }).catch(error => {
-                        log(`Error sending start FW image download command: ${error}`, 'info');
-                    });
-                    i = i + 1;
-                }
-                await sleep(10);
-                aggiornaProgress(Math.floor((i / num_pkt) * 100));
-            }
-            await sleep(100);
-            fw_dowloading = false;
-
-            // FW install
-            if ((ack_received == true) && (i == num_pkt)) {
-                const install_fw_image = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x02, 0x00, 0x00]);
-                let msg = install_fw_image;
-                
-                // Aggiungi CRC16
-                const crc = CRC16(msg);
-                const msgWithCrc = new Uint8Array(msg.length + crc.length);
-                msgWithCrc.set(msg);
-                msgWithCrc.set(crc, msg.length);
-                msg = msgWithCrc;
-                
-                ack_received = false;
-                await rxCharacteristic.writeValue(msg).then(() => {
-                    log('Sent fw Install ... now flashing', 'info');
-                }).catch(error => {
-                    log(`Error sending start FW image download command: ${error}`, 'info');
-                });
-                await sleep(500);
-            } else {
-                log(`Anomalia last ACK: ${ack_received}, last PKT: ${i} / ${num_pkt}`, 'info');
-            }
-        }
-
-        function updateInfoDataFields(dataArray) {
-            const boardSN = document.getElementById('boardSN');
-            const machineSN = document.getElementById('machineSN');
-            const bleName = document.getElementById('bleName');
-            const paramVersion = document.getElementById('paramVersion');
-
-            if (dataArray[5] == 0x00 && dataArray[6] == 0x20) { // data length 32 == 0x0020 bytes, false = Big-endian
-                log('Dati ricevuti corrispondono al formato atteso per Info (byte 5-6 == 0x0020)');
-                if (query_infoID == 'radioGetInfoBoardSN') { // Board SN
-                    boardSN.value = getStringFromData(dataArray, 7, 39);
-                } else if (query_infoID == 'radioGetInfoMachineSN') { // Machine SN
-                    machineSN.value = getStringFromData(dataArray, 7, 39);
-                } else if (query_infoID == 'radioGetInfoBLEName') { // BLE Name
-                    bleName.value = getStringFromData(dataArray, 7, 39);
-                } else if (query_infoID == 'radioGetInfoParamVersion') { // Parameter Version
-                    paramVersion.value = getStringFromData(dataArray, 7, 39);
-                } else {
-                    log('Dati ricevuti NON corrispondono al formato atteso per Info (byte 4 != 0x00/01/02/03)', 'info');
-                    return;
-                }
-                query_infoID = '';
-            } else {
-                log('Dati ricevuti NON corrispondono al formato atteso per Info (byte 5-6 != 0x0020)', 'info');
-                return;
-            }
-        }
-
-        function handleCharacteristicValueChange(event, displayElement) {
-            const value = event.target.value;
-            // DataView.getUint8(0) gets the first byte.
-            // You might need to adjust this depending on the actual data format (e.g., TextDecoder, multiple bytes, etc.)
-            const receivedData = new Uint8Array(value.buffer);
-            const decodedData = new TextDecoder().decode(receivedData); // Attempt to decode as text
-            // displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')} (ASCII: "${decodedData}")`;
-            displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')}`;
-            if ((query_periodica == false) && (fw_dowloading == false)) {
-                log(`Received notification from ${event.target.uuid}: ${decodedData} (Raw: ${receivedData})`);
-            } else {
-                // formatted log status
-            }
-
-            if (receivedData[3] == 0x01 && receivedData[4] == 0x82) {
-                updateStatusDataFields(receivedData);
-            } else if (receivedData[3] == 0x01 && receivedData[4] == 0x81) {
-                updateFWVersionDataFields(receivedData);
-            } else if (receivedData[3] == 0x01 && receivedData[4] == 0x87) {
-                updateInfoDataFields(receivedData);
-            } else if (receivedData[3] == 0x01 && receivedData[4] == 0x86) {
-                log('Set Info ACK received', 'info');
-            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x80) {
-                log('Start FW dowload ACK received', 'info');
-                ack_received = true;
-            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x81) {
-                // log('FW download ACK received', 'info');
-                ack_received = true;
-            } else if (receivedData[3] == 0x02 && receivedData[4] == 0x82) {
-                log('FW Install ACK received', 'info');
-                ack_received = true;
-            } else {
-                log('Dati ricevuti NON corrispondono al formato atteso control-function code', 'info');
-            }
-        }
-
-        function parseHexString(hexStr) {
-            // Rimuovi spazi e converti in maiuscolo
-            const cleanStr = hexStr.trim().toUpperCase();
-            
-            // Splitta sui trattini e filtra elementi vuoti
-            const hexBytes = cleanStr.split('-').filter(hex => hex.length > 0);
-            
-            // Converti ogni byte esadecimale in numero
-            const bytes = hexBytes.map(hex => {
-                const value = parseInt(hex, 16);
-                if (isNaN(value) || value < 0 || value > 255) {
-                    throw new Error(`Valore esadecimale non valido: ${hex}`);
-                }
-                return value;
-            });
-            
-            return new Uint8Array(bytes);
-        }
-
-        // --- Bluetooth Functions ---
-        async function connectDevice() {
-            if (!navigator.bluetooth) {
-                log('Web Bluetooth non supportato in questo browser.', 'info');
-                alert('Spiacente, il tuo browser non supporta Web Bluetooth. Prova Chrome.');
-                return;
-            }
-
-            try {
-                log('Richiesta selezione dispositivo Bluetooth...');
-                device = await navigator.bluetooth.requestDevice({
-                    filters: [{ services: [XPRESS_SERVICE_UUID] }],
-                    // optionalServices: [ // Add any other services if needed
-                    //     'generic_access',
-                    // ]
-                });
-                log(`Dispositivo selezionato: ${device.name || 'Nome Sconosciuto'} (ID: ${device.id})`);
-
-                device.addEventListener('gattserverdisconnected', onDisconnected);
-
-                log('Connessione al server GATT...');
-                const server = await device.gatt.connect();
-                log('Connesso al server GATT.');
-
-                log('Ottenimento del servizio Xpress...');
-                xpressService = await server.getPrimaryService(XPRESS_SERVICE_UUID);
-                log('Servizio Xpress trovato.');
-
-                log('Ottenimento delle caratteristiche...');
-                txCharacteristic = await xpressService.getCharacteristic(XPRESS_TX_CHARACTERISTIC_UUID);
-                rxCharacteristic = await xpressService.getCharacteristic(XPRESS_RX_CHARACTERISTIC_UUID);
-                // modeCharacteristic = await xpressService.getCharacteristic(XPRESS_MODE_CHARACTERISTIC_UUID);
-
-                // log('Caratteristiche ottenute: TX, RX, MODE.');
-                log('Caratteristiche ottenute: TX, RX.');
-
-                // Setup notifications for TX and MODE
-                if (txCharacteristic.properties.notify || txCharacteristic.properties.indicate) {
-                    txCharacteristic.addEventListener('characteristicvaluechanged', (event) => handleCharacteristicValueChange(event, txValueDisplay));
-                    await txCharacteristic.startNotifications();
-                    log('Notifiche per XPRESS_TX avviate.');
-                } else {
-                    log('XPRESS_TX non supporta notifiche o indicazioni.');
-                }
-                /*               
-                if (modeCharacteristic.properties.notify || modeCharacteristic.properties.indicate) {
-                    modeCharacteristic.addEventListener('characteristicvaluechanged', (event) => handleCharacteristicValueChange(event, modeValueDisplay));
-                    await modeCharacteristic.startNotifications();
-                    log('Notifiche per XPRESS_MODE avviate.');
-                    // Read initial value of MODE
-                    // await readMode();
-                    await readCharacteristic(modeCharacteristic, modeValueDisplay);
-                } else {
-                    log('XPRESS_MODE non supporta notifiche o indicazioni.');
-                }
-                */                
-                updateConnectionStatus(true);
-                log('Connessione e configurazione completate con successo!');
-
-            } catch (error) {
-                log(`Errore di connessione: ${error.name}: ${error.message}`, 'info');
-                updateConnectionStatus(false);
-            }
-        }
-
-        function onDisconnected(event) {
-            const disconnectedDevice = event.target;
-            log(`Dispositivo ${disconnectedDevice.name || disconnectedDevice.id} disconnesso.`, 'info');
-            updateConnectionStatus(false);
-            // Clean up characteristic references
-            txCharacteristic = null;
-            rxCharacteristic = null;
-            // modeCharacteristic = null;
-            xpressService = null;
-            device = null;
-        }
-
-        async function disconnectDevice() {
-            if (device && device.gatt.connected) {
-                log('Disconnessione dal dispositivo...');
-                device.gatt.disconnect();
-                // onDisconnected will handle UI updates
-            } else {
-                log('Nessun dispositivo connesso.', 'info');
-                updateConnectionStatus(false);
-            }
-        }
-
-        async function writeToCharacteristic(characteristic, inputElement) {
-            if (!characteristic) {
-                log('Caratteristica non disponibile. Connettiti prima.', 'info');
-                return;
-            }
-            const value = inputElement.value;
-            if (!value) {
-                log('Il campo di input è vuoto. Inserisci un valore.', 'info');
-                return;
-            }
-
-            try {
-                // const encoder = new TextEncoder(); // UTF-8 encoder
-                // const data = encoder.encode(value);
-                const data = parseHexString(value)  
-                await characteristic.writeValue(data);
-                if (query_periodica == false) {
-                    log(`Scritto "${value}" su ${characteristic.uuid}.`);
-                }
-                // inputElement.value = ''; // Clear input after sending
-            } catch (error) {
-                log(`Errore durante la scrittura su ${characteristic.uuid}: ${error.message}`, 'info');
-            }
-        }
-
-        // async function readCharacteristic(characteristic, displayElement) {
-        //     if (!characteristic) {
-        //         log('Caratteristica non disponibile. Connettiti prima.', 'info');
-        //         return;
-        //     }
-        //     try {
-        //         const value = await characteristic.readValue();
-        //         const receivedData = new Uint8Array(value.buffer);
-        //         const decodedData = new TextDecoder().decode(receivedData);
-        //         displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')}`;
-        //         log(`Letto da ${characteristic.uuid}: "${decodedData}" (Raw: ${receivedData}).`);
-        //     } catch (error) {
-        //         log(`Errore durante la lettura da ${characteristic.uuid}: ${error.message}`, 'info');
-        //     }
-        // }
-
-        // --- Event Listeners ---
-        connectButton.addEventListener('click', connectDevice);
-        disconnectButton.addEventListener('click', disconnectDevice);
-        writeRxButton.addEventListener('click', () => writeToCharacteristic(rxCharacteristic, rxInput));
-        queryForm.addEventListener('click', (event) => {
-            const boardSN = document.getElementById('boardSN');
-            const machineSN = document.getElementById('machineSN');
-            const bleName = document.getElementById('bleName');
-            const paramVersion = document.getElementById('paramVersion');
-            if (event.target.name === 'sceltaQuery') {
-                if ((event.target.id === 'radioGetStatus') || 
-                (event.target.id === 'radioGetVersion') || 
-                (event.target.id === 'radioGetInfoBoardSN') || 
-                (event.target.id === 'radioGetInfoMachineSN') || 
-                (event.target.id === 'radioGetInfoBLEName') || 
-                (event.target.id === 'radioGetInfoParamVersion')) {
-                    rxInput.value = event.target.value;
-                    query_infoID = event.target.id;
-                } else if (event.target.id === 'radioSetInfoBoardSN') {
-                    rxInput.value = querySetInfo(boardSN.value, 0x00);
-                } else if (event.target.id === 'radioSetInfoMachineSN') {
-                    rxInput.value = querySetInfo(machineSN.value, 0x01);
-                } else if (event.target.id === 'radioSetInfoBLEName') {
-                    rxInput.value = querySetInfo(bleName.value, 0x02);
-                } else if (event.target.id === 'radioSetInfoParamVersion') {
-                    rxInput.value = querySetInfo(paramVersion.value, 0x03);
-                } else if (event.target.id === 'fwUpdate') {
-                    rxInput.value = 'FW Update selected. Choose a file.'; // Placeholder
-                }
-            }
-        });
-        chekboxPeriodicQuery.addEventListener('change', (event) => {
-            if(event.target.checked) {
-                log('Periodic Query abilitata. (Funzionalità da implementare)');
-                // Implement periodic query logic if needed
-                query_periodica = true
-                log('Machine Status Monitor')
-                log('Status;Duration;Progress;ProbeT;EnvT;MotI;TECV;LoadsV;MotfI;MotDuty;MotV;Motw;MoPos;Flavour;Opt;Scan','monitor');
-                periodicQueryInterval = setInterval(() => {
-                    if (rxInput.value) {
-                        writeToCharacteristic(rxCharacteristic, rxInput);
-                        writeRxButton.disabled = true; // Disable button to prevent manual sends during periodic query
-                    } else {
-                        log('Nessuna query selezionata per la periodic query.', 'info');
-                    }
-                }, 1000); // Esempio: ogni 1000 millisecondi
-            } else {
-                query_periodica = false
-                log('Periodic Query disabilitata.');
-                // Stop periodic query logic if implemented
-                periodicQueryInterval = clearInterval(periodicQueryInterval);
-                writeRxButton.disabled = false; // Re-enable button if no query is set
-                
-            }
-        });
-        
-        fwFileInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                log(`File selezionato per l'aggiornamento firmware: ${file.name} (${file.size} bytes)`, 'info');
-                // Implement firmware update logic if needed
-                const arrayBuffer = await file.arrayBuffer();
-                const fw_uint8Array = new Uint8Array(arrayBuffer);
-                log(`Contenuto del file (primi 64 bytes): 0x${Array.from(fw_uint8Array.slice(0, 64)).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
-                // Further processing of the firmware file can be done here
-                queryUpdateFW(fw_uint8Array);
-            } else {
-                log('Nessun file selezionato.', 'info');
-            }
-        });
-
-
-        // readModeButton.addEventListener('click', () => readCharacteristic(modeCharacteristic, modeValueDisplay));
-        // writeModeButton.addEventListener('click', () => writeToCharacteristic(modeCharacteristic, modeInput));
-
-        // Initial UI state
-        clearDataFields();
-        updateConnectionStatus(false);
-        log('Pronto per la connessione. Assicurati che Web Bluetooth sia abilitato nel tuo browser e che il dispositivo sia in modalità advertising.');
-    </script>
 </body>
 </html>
