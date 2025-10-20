@@ -17,9 +17,12 @@
         <p style = "font-size: small;"><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
             Assicurati di utilizzare un browser compatibile (es. Chrome) e che il Bluetooth sia abilitato.<br>
             Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.<br>
-            Su PC Windows: <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
-            <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i><br>
-            Su smartphone e tablet una notifica di pairing dovrebbe apparire automaticamente. Segui le istruzioni a schermo.</p>
+            - PC Windows: <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
+            <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti]<br>
+            - PC linux: associa il dispositivo e attiva il flag #experimental-web-platform-features in about://flags<br>
+            - MAC: ... da provare ... <br>
+            - Android: [Connetti] >>> seleziona il dispositivo >>> [Associa], una notifica di pairing dovrebbe apparire automaticamente. Segui le istruzioni a schermo.<br>
+            - iOS: Web Bluetooth API attualmente non supportate</p>
 
         <div class="section" style ="display: flex; text-align: center;">
             <p class="status" id="connectionStatus" style = "width: 20%;">Disconnesso</p>
