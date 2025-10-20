@@ -2,7 +2,7 @@
 const XPRESS_SERVICE_UUID = '331a36f5-2459-45ea-9d95-6142f0c4b307';
 const XPRESS_TX_CHARACTERISTIC_UUID = 'a73e9a10-628f-4494-a099-12efaf72258f';
 const XPRESS_RX_CHARACTERISTIC_UUID = 'a9da6040-0823-4995-94ec-9ce41ca28833';
-// const XPRESS_MODE_CHARACTERISTIC_UUID = '75a9f022-af03-4e41-b4bc-9de90a47d50b';
+const XPRESS_MODE_CHARACTERISTIC_UUID = '75a9f022-af03-4e41-b4bc-9de90a47d50b';
 
 // Global variables for Bluetooth objects
 let device;
@@ -10,7 +10,7 @@ let xpressService;
 let txCharacteristic;
 let rxCharacteristic;
 let periodicQueryInterval = null;
-// let modeCharacteristic;
+let modeCharacteristic;
 
 // --- Bluetooth Functions ---
 async function connectDevice() {
@@ -43,10 +43,34 @@ async function connectDevice() {
         log('Ottenimento delle caratteristiche...');
         txCharacteristic = await xpressService.getCharacteristic(XPRESS_TX_CHARACTERISTIC_UUID);
         rxCharacteristic = await xpressService.getCharacteristic(XPRESS_RX_CHARACTERISTIC_UUID);
-        // modeCharacteristic = await xpressService.getCharacteristic(XPRESS_MODE_CHARACTERISTIC_UUID);
+        modeCharacteristic = await xpressService.getCharacteristic(XPRESS_MODE_CHARACTERISTIC_UUID);
+
+        // --- Gestione del pairing/bonding ---
+        // Alcuni dispositivi richiedono che il pairing sia completato
+        // prima di poter accedere a determinate caratteristiche protette.
+        // Ecco come possiamo forzare il pairing se necessario.
+        // Esempio di caratteristica protetta che richiede pairing ... tentiamo di forzare il pairing
+        const protectedCharacteristic = modeCharacteristic; // Sostituisci con la caratteristica effettivamente protetta
+        try {
+            // 2.b. Tenta di leggere la caratteristica protetta
+            // Questo FORZA la richiesta di sicurezza
+            await protectedCharacteristic.readValue();
+
+            // Se la lettura riesce, significa che il pairing (e l'eventuale bonding)
+            // sono stati completati con successo dal sistema operativo.
+            log('Pairing riuscito, caratteristica letta.', 'info');
+
+        } catch (error) {
+            // Se la lettura fallisce (ad es. per Insufficient Authentication)
+            // e lo stack Bluetooth del sistema operativo è ben implementato,
+            // la procedura di pairing/dialogo utente si avvierà qui.
+            log('Errore durante l\'accesso alla caratteristica protetta. Potrebbe essere avviato il pairing.', 'info');
+            // A questo punto, il sistema operativo dovrebbe mostrare il popup di pairing.
+            // La tua app si ricollegherà o riproverà l'accesso una volta completato.
+        }
 
         // log('Caratteristiche ottenute: TX, RX, MODE.');
-        log('Caratteristiche ottenute: TX, RX.');
+        log('Caratteristiche ottenute: TX, RX, MODE.');
 
         // Setup notifications for TX and MODE
         if (txCharacteristic.properties.notify || txCharacteristic.properties.indicate) {
