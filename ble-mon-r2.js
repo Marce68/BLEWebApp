@@ -547,7 +547,13 @@ queryForm.addEventListener('click', (event) => {
         } else if (event.target.id === 'radioSetInfoParamVersion') {
             rxInput.value = querySetInfo(paramVersion.value, 0x03);
         } else if (event.target.id === 'fwUpdate') {
-            rxInput.value = 'Contatta support@tooa.com, ti invieremo il file corretto!'; // Placeholder
+            // rxInput.value = 'Contatta support@tooa.com, ti invieremo il file corretto!'; // Placeholder
+            alert('Per aggiornare il firmware hai bisogno di files con estensione *.bin; ' +
+                'contatta support@tooa.com, scrivi nel messaggio tutte le informazioni che puoi ottenere ' +
+                'con i comandi Get in questa pagina (va bene uno screenshot se preferisci).\nTi invieremo noi il file corretto!\n\n' +                
+                'To update the firmware, you need files with the *.bin extension; ' +
+                'contact support@tooa.com, and include in the message all the information you can obtain ' + 
+                "with the Get commands on this page (a screenshot is fine if you prefer).\nWe'll send you the correct file!");
         }
     }
 });
