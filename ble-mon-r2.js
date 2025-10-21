@@ -547,7 +547,7 @@ queryForm.addEventListener('click', (event) => {
         } else if (event.target.id === 'radioSetInfoParamVersion') {
             rxInput.value = querySetInfo(paramVersion.value, 0x03);
         } else if (event.target.id === 'fwUpdate') {
-            rxInput.value = 'FW Update selected. Choose a file.'; // Placeholder
+            rxInput.value = 'Contatta support@tooa.com, ti invieremo il file corretto!'; // Placeholder
         }
     }
 });
