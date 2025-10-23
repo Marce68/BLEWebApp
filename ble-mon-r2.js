@@ -17,6 +17,7 @@ let rxInput = document.getElementById('rxInput');
 // const modeInput = document.getElementById('modeInput');
 const txValueDisplay = document.getElementById('txValue');
 // const modeValueDisplay = document.getElementById('modeValue');
+let statsOutput = document.getElementById('statsOutput');
 const connectionStatusDisplay = document.getElementById('connectionStatus');
 const logDiv = document.getElementById('log');
 
@@ -24,6 +25,7 @@ let query_periodica = false;
 let query_infoID = '';
 let ack_received = false;
 let fw_dowloading = false;
+let blacklist_downloading = false;
 
 // --- Helper Functions ---
 function log(message, type = 'info') {
@@ -230,7 +232,7 @@ function updateStatusDataFields(dataArray) {
         if (dataArray.length >= 44) {
             scannerConnected.value = bytesToSInt(dataArray, 42, 2, false);
             strStatusMonitor += scannerConnected.value;
-            strStatusMonitor += ';';
+            // strStatusMonitor += ';';
         }
         if (query_periodica == true) {
             log(strStatusMonitor,'monitor')
@@ -439,7 +441,7 @@ async function queryUpdateFW (fw) {
         await sleep(10);
         aggiornaProgress(Math.floor((i / num_pkt) * 100));
     }
-    await sleep(100);
+    await sleep(500);
     fw_dowloading = false;
 
     // FW install
@@ -465,6 +467,34 @@ async function queryUpdateFW (fw) {
         log(`Anomalia last ACK: ${ack_received}, last PKT: ${i} / ${num_pkt}`, 'info');
     }
 }
+
+async function downloadBlackList() {
+    let recordNumber = 1;
+    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x09, 0x00, 0x02, 0x00, 0x00]); // Header + placeholder for record number
+
+    log('Download BlackList ...', 'info');
+    blacklist_downloading = true;
+    while (blacklist_downloading) {
+        // Aggiungi il numero del record da leggere (2 byte, big-endian)
+        msg[7] = (recordNumber >> 8) & 0xFF; // MSB
+        msg[8] = recordNumber & 0xFF;
+        // Aggiungi CRC16
+        const crc = CRC16(msg);
+        const msg_with_crc = new Uint8Array(msg.length + crc.length);
+        msg_with_crc.set(msg);
+        msg_with_crc.set(crc, msg.length);
+        statsOutput.value = `0x${Array.from(msg_with_crc).map(b => b.toString(16).padStart(2, '0')).join('')}`;
+        ack_received = false;   
+        await rxCharacteristic.writeValue(msg_with_crc).then(() => {
+            // log('Query BlackList command sent', 'info');
+        }).catch(error => {
+            log(`Error sending Query BlackList command: ${error}`, 'info');
+        });
+        await sleep(100); // Attendi la risposta prima di inviare la prossima richiesta
+        recordNumber++;
+    }
+}
+
 
 function updateInfoDataFields(dataArray) {
     const boardSN = document.getElementById('boardSN');
@@ -502,7 +532,7 @@ function handleCharacteristicValueChange(event, displayElement) {
     const decodedData = new TextDecoder().decode(receivedData); // Attempt to decode as text
     // displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')} (ASCII: "${decodedData}")`;
     displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')}`;
-    if ((query_periodica == false) && (fw_dowloading == false)) {
+    if ((query_periodica == false) && (fw_dowloading == false) && (blacklist_downloading == false)) {
         log(`Received notification from ${event.target.uuid}: ${decodedData} (Raw: ${receivedData})`);
     } else {
         // formatted log status
@@ -525,8 +555,25 @@ function handleCharacteristicValueChange(event, displayElement) {
     } else if (receivedData[3] == 0x02 && receivedData[4] == 0x82) {
         log('FW Install ACK received', 'info');
         ack_received = true;
+    } else if (receivedData[3] == 0x01 && receivedData[4] == 0x89) {
+        // log('Download Blacklist ACK received', 'info');
+        ack_received = true;
+        if (receivedData[7+9] >= 0x00 && receivedData[7+9] != 0xFF) {
+            blacklist_downloading = true;
+            let source = '';
+            if (receivedData[7+0] == 0x00) {
+                source = 'BLE';
+            } else if (receivedData[7+0] == 0x01) {
+                source = 'SCANNER'; 
+            }
+            const lotto = bytesToSInt(receivedData, 7+1, 4, false);
+            const code = bytesToSInt(receivedData, 7+5, 4, false);
+            log(`Source=${source}, Lot=${lotto}, Code=${code}`, 'info');
+        } else {
+            blacklist_downloading = false;
+        }
     } else {
-        log('Dati ricevuti NON corrispondono al formato atteso control-function code', 'info');
+        log('Dati ricevuti NON corrispondono al formato atteso control-function code or NACK', 'info');
     }
 }
 
