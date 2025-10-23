@@ -11,20 +11,25 @@
 <body>
     <div class="container">
         <h1>
-            <img src="android-chrome-192x192.png" alt="Milano Pro Black Matt" style="float:right;width:33%;height:33%;">
+            <img src="android-chrome-192x192.png" alt="Milano Pro Black Matt" style="float:right;width:30%;height:30%;">
             BLE Monitor
         </h1>
-        <p style = "font-size: small;"><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
-            Assicurati di utilizzare un browser compatibile (es. Chrome o Edge) e che il Bluetooth sia abilitato.
-            Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.<br>
-            - PC Windows: associa il dispositivo con <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
-            <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]<br>
-            - PC linux: associa il dispositivo e attiva il flag <strong>#experimental-web-platform-features</strong> 
-            in <strong>about://flags</strong> quindi [Connetti] >>> seleziona il dispositivo >>> [Accoppia]<br>
-            - MAC: ... da provare ... <br>
-            - Android: [Connetti] >>> seleziona il dispositivo >>> [Accoppia], una notifica di pairing dovrebbe apparire automaticamente.
-            Eventualmente controlla la lista delle notifiche e selezionala, quindi segui le istruzioni a schermo.<br>
-            - iOS: funziona come Android, ma solo con il web browser <strong>Bluefy</strong></p>
+        <div style = "font-size: small; text-align: justify; width: 65%;">
+            <p><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
+                Assicurati di utilizzare un browser compatibile (es. Chrome o Edge o Chromium) e che il Bluetooth sia abilitato.
+                Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.</i>
+            </p>    
+            <ul>
+                <li><i>Windows: associa il dispositivo con <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
+                <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
+                <li><i>Linux: connetti e associa il dispositivo, attiva nel browser i flags necessari con parole chiave "web" e "bluetooth" 
+                in <strong>about://flags</strong> quindi [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
+                <li><i>macOS: ... da provare ... </i></li>
+                <li><i>Android: [Connetti] >>> seleziona il dispositivo >>> [Accoppia], una notifica di pairing dovrebbe apparire automaticamente.
+                Eventualmente controlla la lista delle notifiche e selezionala, quindi segui le istruzioni a schermo.</i></li>
+                <li><i>iOS: come Android, ma funziona solo con il web browser <strong>Bluefy</strong></i></li>
+            </ul>
+        </div>
 
         <div class="section" style ="display: flex; text-align: center;">
             <p class="status" id="connectionStatus" style = "width: 20%;">Disconnesso</p>
@@ -200,10 +205,16 @@
             </form>
         </fieldset>
 
+        <div class="section" style = "display:flex; align-items: center; gap: 0px;">
+            <input type="text" id="statsOutput" style ="float: right; width: 75%;" placeholder="Statistics data ...">
+            <button id="getStatsButton" class="action" disabled style = "width: 20%">Read</button>
+        </div>
+
         <div class="section">
             <h2>
                 Log
-                <button id = "saveButton" class = "action" onclick="scaricaLog()">Save Log</button>
+                <button id = "saveButton" class = "action" onclick="scaricaLog()">Save</button>
+                <button id = "sendButton" class = "action" onclick="inviaLog()">Send</button>
             </h2>
             <div id="log" class="log-area"></div>
         </div>

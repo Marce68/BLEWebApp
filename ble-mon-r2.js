@@ -76,6 +76,17 @@ function scaricaLog() {
     log("Log scaricato con successo!", 'info');
 }
 
+function inviaLog() {
+    const mioIndirizzo = "ff_service@tooa.com";
+    // Codifica il testo per l'URL
+    const oggetto = encodeURIComponent("Log BLE-MON");
+    const corpo = "Allega il file di Log che hai salvato tramite l'apposito pulsante.";
+
+    const mailtoLink = `mailto:${mioIndirizzo}?subject=${oggetto}&body=${encodeURIComponent(corpo)}`;
+    // window.location.href = mailtoLink;
+    window.open(mailtoLink, '_blank');
+}
+
 function updateConnectionStatus(isConnected) {
     if (isConnected) {
         connectionStatusDisplay.textContent = 'Connesso';
