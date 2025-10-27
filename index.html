@@ -10,18 +10,20 @@
 </head>
 <body>
     <div class="container">
-        <h1>
-            <img src="android-chrome-192x192.png" alt="Milano Pro Black Matt" style="float:right;width:30%;height:30%;">
-            BLE Monitor
-        </h1>
-        <div style = "font-size: small; text-align: justify; width: 65%;">
+        <div style="display:flex; align-items: center;">
+            <img src="android-chrome-192x192.png" alt="TOOA" style="float:left; width:15%; height:15%; padding: 20px;">
+            <h1 style="padding:20px;">BLE Monitor</h1>
+        </div>
+        <details>
+        <summary><strong>Informazioni</strong></summary>
+        <div style = "font-size: small; text-align: justify;">
             <p><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
                 Assicurati di utilizzare un browser compatibile (es. Chrome o Edge o Chromium) e che il Bluetooth sia abilitato.
                 Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.</i>
             </p>    
             <ul>
                 <li><i>Windows: associa il dispositivo con <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
-                <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
+                <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</li>
                 <li><i>Linux: connetti e associa il dispositivo, attiva nel browser i flags necessari con parole chiave "web" e "bluetooth" 
                 in <strong>about://flags</strong> quindi [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
                 <li><i>macOS: ... da provare ... </i></li>
@@ -30,6 +32,7 @@
                 <li><i>iOS: come Android, ma funziona solo con il web browser <strong>Bluefy</strong></i></li>
             </ul>
         </div>
+        </details>
 
         <div class="section" style ="display: flex; text-align: center;">
             <p class="status" id="connectionStatus" style = "width: 20%;">Disconnesso</p>
