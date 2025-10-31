@@ -17,7 +17,7 @@ let rxInput = document.getElementById('rxInput');
 // const modeInput = document.getElementById('modeInput');
 const txValueDisplay = document.getElementById('txValue');
 // const modeValueDisplay = document.getElementById('modeValue');
-let statsOutput = document.getElementById('statsOutput');
+// let statsOutput = document.getElementById('statsOutput');
 const connectionStatusDisplay = document.getElementById('connectionStatus');
 const logDiv = document.getElementById('log');
 
@@ -26,6 +26,8 @@ let query_infoID = '';
 let ack_received = false;
 let fw_dowloading = false;
 let blacklist_downloading = false;
+// let last_code_sent = [];
+let last_code_sent = new Uint8Array(0);
 
 // --- Helper Functions ---
 function log(message, type = 'info') {
@@ -468,9 +470,140 @@ async function queryUpdateFW (fw) {
     }
 }
 
+
+function generaCodiceDataOra(flavor) {
+    // 1. Ottieni l'oggetto data corrente
+    const oggi = new Date();
+
+    // --- PARTE DATA (5 Caratteri: AA + GGG) ---
+    
+    // Anno abbreviato (AA)
+    const annoCompleto = oggi.getFullYear().toString();
+    const annoAbbreviato = annoCompleto.slice(-2); // Es: "25"
+
+    // Giorno Progressivo (GGG), con padding di zeri
+    const inizioAnno = new Date(oggi.getFullYear(), 0, 1);
+    const differenzaMs = oggi - inizioAnno;
+    const giornoProgressivoNumero = Math.floor(differenzaMs / (1000 * 60 * 60 * 24)) + 1;
+    const giornoProgressivoStringa = giornoProgressivoNumero.toString().padStart(3, '0'); // Es: "305"
+
+    // --- PARTE ORA (6 Caratteri: HH + MM + SS) ---
+
+    // Ore (HH), con padding di zeri
+    const ore = oggi.getHours().toString().padStart(2, '0'); // Es: "11"
+
+    // Minuti (MM), con padding di zeri
+    const minuti = oggi.getMinutes().toString().padStart(2, '0'); // Es: "38"
+
+    // Secondi (SS), con padding di zeri
+    const secondi = oggi.getSeconds().toString().padStart(2, '0'); // Es: "31"
+
+    // 4. Combina tutte le parti
+    const codiceDataFlavorOra = annoAbbreviato + giornoProgressivoStringa + flavor + ore + minuti + secondi;
+
+    return codiceDataFlavorOra;
+}
+
+async function sendCode() {
+    const flavorCode = document.getElementById('flavor').value;
+    const flavorstr = flavorCode.padStart(3, '0').slice(0, 3);
+
+    // Map flavor code to cluster code
+    const fcMap = {
+    "0": "4",
+    "1": "1",
+    "2": "1",
+    "3": "1",
+    "4": "1",
+    "5": "1",
+    "6": "1",
+    "7": "1",
+    "8": "1",
+    "9": "1",
+    "10": "1",
+    "11": "2",
+    "12": "2",
+    "13": "2",
+    "14": "2",
+    "15": "3",
+    "16": "2",
+    "17": "3",
+    "18": "1",
+    "19": "1",
+    "20": "1",
+    "21": "2",
+    "22": "2",
+    "23": "3",
+    "24": "1",
+    "25": "3",
+    "26": "1",
+    "27": "2",
+    "28": "2",
+    "29": "2",
+    "30": "1",
+    "31": "2",
+    "32": "2",
+    "33": "1",
+    "50": "6",
+    "51": "7"
+    };
+    const clusterCode = fcMap[flavorCode];
+
+    let code = generaCodiceDataOra(flavorstr) + clusterCode + "1110000";
+     // Calcolo del checksum
+    const code_num = Array.from(code, Number);
+    const chk_mul = [3,7,3,7,3,7,3,7,3,7,3,7,3,7,3,7,3,7,3,7,3,7];
+    let somma = 0;
+    for (let i = 0; i < code_num.length; i++) {
+        somma = somma + chk_mul[i] * code_num[i];
+    }
+    resto = somma % 100;
+    let chk = [0,0];
+    chk[0] = Math.trunc((99-resto)/10);
+    chk[1] = (99-resto) % 10;
+    code = code + chk.join('');
+
+    log(`Generated code: ${code}`, 'info');
+   
+    const msg_head = new Uint8Array([0xAA, 0x01, 0x00, 0x00, 0x00, 0x00, 0x40]); // Header
+    let msg = new Uint8Array(msg_head.length + 64 + 2); // header + 64 bytes data + CRC, tutto 0x00
+    msg.set(msg_head);
+    msg.set(Array.from(code, c => c.charCodeAt(0)), msg_head.length); // Fill code as ASCII bytes
+    const crc = CRC16(msg.slice(0, msg.length - 2));
+    msg.set(crc, msg.length - 2); // Append CRC
+    
+    ack_received = false;
+    await rxCharacteristic.writeValue(msg).then(() => {
+        log('Send Code command sent', 'info');
+    }).catch(error => {
+        log(`Error sending Send Code command: ${error}`, 'info');
+    });
+
+
+    last_code_sent = msg;
+    // const encoder = new TextEncoder();
+    // const flavorBytes = encoder.encode(flavorstr);
+}
+
+async function cancelCode() {
+    if (last_code_sent.length == 0) { retun -1; }
+
+    last_code_sent[4] = 0x01; // Change function code to Cancel Code (0x01)
+    // Recalculate CRC
+    const crc = CRC16(last_code_sent.slice(0, last_code_sent.length - 2));
+    last_code_sent.set(crc, last_code_sent.length - 2); // Append new CRC
+    ack_received = false;
+    await rxCharacteristic.writeValue(last_code_sent).then(() => {
+        log('Cancel Code command sent', 'info');
+    }).catch(error => {
+        log(`Error sending Cancel Code command: ${error}`, 'info');
+    });
+
+}
+
 async function downloadBlackList() {
     let recordNumber = 1;
-    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x09, 0x00, 0x02, 0x00, 0x00]); // Header + placeholder for record number
+    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x09, 0x00, 0x02, 0x00, 0x00]); // Header + record number placeholder
 
     log('Download BlackList ...', 'info');
     blacklist_downloading = true;
@@ -483,7 +616,7 @@ async function downloadBlackList() {
         const msg_with_crc = new Uint8Array(msg.length + crc.length);
         msg_with_crc.set(msg);
         msg_with_crc.set(crc, msg.length);
-        statsOutput.value = `0x${Array.from(msg_with_crc).map(b => b.toString(16).padStart(2, '0')).join('')}`;
+        // statsOutput.value = `0x${Array.from(msg_with_crc).map(b => b.toString(16).padStart(2, '0')).join('')}`;
         ack_received = false;   
         await rxCharacteristic.writeValue(msg_with_crc).then(() => {
             // log('Query BlackList command sent', 'info');
@@ -572,6 +705,13 @@ function handleCharacteristicValueChange(event, displayElement) {
         } else {
             blacklist_downloading = false;
         }
+    } else if (receivedData[3] == 0x00 && receivedData[4] == 0x80) {
+        log('Send Code ACK received', 'info');
+        ack_received = true;
+    } else if (receivedData[3] == 0x00 && receivedData[4] == 0x81) {
+        log('Cancel Code ACK received', 'info');
+        ack_received = true;
+        last_code_sent = new Uint8Array(0); // reset last code sent
     } else {
         log('Dati ricevuti NON corrispondono al formato atteso control-function code or NACK', 'info');
     }

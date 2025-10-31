@@ -209,8 +209,48 @@
         </fieldset>
 
         <div class="section" style = "display:flex; align-items: center; gap: 0px;">
-            <input type="text" id="statsOutput" style ="float: right; width: 75%;" placeholder="Statistics data ...">
-            <button id="getStatsButton" class="action" onclick="downloadBlackList()" style = "width: 20%">Read</button>
+        <!--    <input type="text" id="statsOutput" style ="float: right; width: 30%;" placeholder="Flavor specific cycles ...">    -->
+            <select name="flavor" id="flavor" style = "width: 35%; height: 37px; border-radius: 5px;">
+                <option value="0"> > Choose your flavor</option>
+                <option value="1">Fior di latte</option>
+                <option value="2">Crema</option>
+                <option value="3">Nocciola</option>
+                <option value="4">Gianduia</option>
+                <option value="5">Cioccolato al Latte</option>
+                <option value="6">Pistacchio</option>
+                <option value="7">Pistacchio Vegano</option>
+                <option value="8">Nocciola Vegana</option>
+                <option value="9">Fondente</option>
+                <option value="10">Riso e zafferano</option>
+                <option value="11">Fragola</option>
+                <option value="12">Limone</option>
+                <option value="13">Arancia rossa</option>
+                <option value="14">Spritz</option>
+                <option value="15">Saporito</option>
+                <option value="16">Bellini</option>
+                <option value="17">Cappuccino</option>
+                <option value="18">Rossini</option>
+                <option value="19">Mandorla</option>
+                <option value="20">Pesto ligure</option>
+                <option value="21">5 colori della frutta</option>
+                <option value="22">Frutto del cacao</option>
+                <option value="23">Crema al mascarpone</option>
+                <option value="24">Crema la passito</option>
+                <option value="25">Marron glacé</option>
+                <option value="26">Cioccolato Venezuela</option>
+                <option value="27">Sorbetto verde</option>
+                <option value="28">Sorbetto giallo</option>
+                <option value="29">Sorbetto rosso</option>
+                <option value="30">Skyr frutti rossi</option>
+                <option value="31">Mango</option>
+                <option value="32">Mandarino</option>
+                <option value="33">Cioccolato caramel</option>
+                <option value="50">Coco Plain</option>
+                <option value="51">Coco Protein</option>
+            </select>
+            <button id="sendCodeButton" class="secondary" onclick="sendCode()" style = "width: 20%">Send Code</button>
+            <button id="cancelCodeButton" class="secondary" onclick="cancelCode()" style = "width: 20%">Cancel Code</button>
+            <button id="getStatsButton" class="action" onclick="downloadBlackList()" style = "width: 20%">Read Log</button>
         </div>
 
         <div class="section">
