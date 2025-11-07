@@ -52,21 +52,19 @@ async function connectDevice() {
         // Esempio di caratteristica protetta che richiede pairing ... tentiamo di forzare il pairing
         const protectedCharacteristic = modeCharacteristic; // Sostituisci con la caratteristica effettivamente protetta
         try {
-            // 2.b. Tenta di leggere la caratteristica protetta
+            // Tenta di leggere la caratteristica protetta
             // Questo FORZA la richiesta di sicurezza
             await protectedCharacteristic.readValue();
-
             // Se la lettura riesce, significa che il pairing (e l'eventuale bonding)
             // sono stati completati con successo dal sistema operativo.
             log('Pairing riuscito, caratteristica letta.', 'info');
-
         } catch (error) {
             // Se la lettura fallisce (ad es. per Insufficient Authentication)
             // e lo stack Bluetooth del sistema operativo è ben implementato,
             // la procedura di pairing/dialogo utente si avvierà qui.
             log('Errore durante l\'accesso alla caratteristica protetta. Potrebbe essere avviato il pairing.', 'info');
             // A questo punto, il sistema operativo dovrebbe mostrare il popup di pairing.
-            // La tua app si ricollegherà o riproverà l'accesso una volta completato.
+            // La webapp si ricollegherà o riproverà l'accesso una volta completato.
         }
 
         // log('Caratteristiche ottenute: TX, RX, MODE.');
@@ -159,9 +157,9 @@ async function writeToCharacteristic(characteristic, inputElement) {
         // const data = encoder.encode(value);
         const data = parseHexString(value)  
         await characteristic.writeValue(data);
-        if (query_periodica == false) {
-            log(`Scritto "${value}" su ${characteristic.uuid}.`);
-        }
+        // if (query_periodica == false) {
+        //     log(`Scritto "${value}" su ${characteristic.uuid}.`);
+        // }
         // inputElement.value = ''; // Clear input after sending
     } catch (error) {
         log(`Errore durante la scrittura su ${characteristic.uuid}: ${error.message}`, 'info');

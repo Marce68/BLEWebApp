@@ -21,6 +21,7 @@ const txValueDisplay = document.getElementById('txValue');
 const connectionStatusDisplay = document.getElementById('connectionStatus');
 const logDiv = document.getElementById('log');
 
+let machine_status = 99;
 let query_periodica = false;
 let query_infoID = '';
 let ack_received = false;
@@ -112,6 +113,7 @@ function updateConnectionStatus(isConnected) {
         // writeModeButton.disabled = true;
         // modeValueDisplay.textContent = 'N/D';
         document.getElementById('fieldsetQuery').disabled = true;
+
     }
 }
 
@@ -185,6 +187,10 @@ function updateStatusDataFields(dataArray) {
     if (dataArray[5] == 0x00 && dataArray[6] >= 0x22) { // 0x0022 == 34 <= data length <= 37 == 0x0025 bytes, false = Big-endian
         // log('Dati ricevuti corrispondono al formato atteso per la versione (byte 5-6 == 0x0025)');
         systemState.value = bytesToSInt(dataArray, 7, 1); // offset 0x00
+        machine_status = systemState.value; // Variabile globale: l'extra time si può settare solo se la macchina è in stato 2 (RUN)
+        if (machine_status < 2) {
+            document.getElementById('optionExtra').style.color = 'black'; // In stato REDAY o BLOCCATO riporta a nero
+        }
         strStatusMonitor += systemState.value;
         strStatusMonitor += ';';
         cycleTimeDuration.value = bytesToSInt(dataArray, 8, 4, false)/10;
@@ -601,6 +607,71 @@ async function cancelCode() {
 
 }
 
+async function resetAlarms() {
+    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00]); // Header + len = 4 + data
+    log('Reset Alarms ...', 'info');   
+    // Aggiungi CRC16
+    const crc = CRC16(msg);
+    const msg_with_crc = new Uint8Array(msg.length + crc.length);
+    msg_with_crc.set(msg);
+    msg_with_crc.set(crc, msg.length);
+    ack_received = false;
+    await rxCharacteristic.writeValue(msg_with_crc).then(() => {
+        log(`Reset Alarms command sent: ${msg_with_crc}`, 'info');
+    }).catch(error => {
+        log(`Error sending Reset Alarms command: ${error}`, 'info');
+    });
+}
+
+async function sendOption(opt) {
+    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x08, 0x00, 0x01, opt]); // Header + len = 1 + data
+    if (opt == 0x00) {
+        log('Deselect Option ...', 'info');
+        document.getElementById('optionCreamy').style.color = 'blue';
+        document.getElementById('optionSolid').style.color = 'black';   
+    } else {
+        log('Select Option ...', 'info');
+        document.getElementById('optionCreamy').style.color = 'black';
+        document.getElementById('optionSolid').style.color = 'blue';   
+    }
+    log('Select Option ...', 'info');   
+    // Aggiungi CRC16
+    const crc = CRC16(msg);
+    const msg_with_crc = new Uint8Array(msg.length + crc.length);
+    msg_with_crc.set(msg);
+    msg_with_crc.set(crc, msg.length);
+    ack_received = false;
+    await rxCharacteristic.writeValue(msg_with_crc).then(() => {
+        log(`Select Option command sent: ${msg_with_crc}`, 'info');
+    }).catch(error => {
+        log(`Error sending Select Option command: ${error}`, 'info');
+    });
+}
+
+async function sendExtra(opt) {
+    // sendOption(0x01);
+    // await sleep(500);
+    if ((machine_status != 2) && (machine_status != 3)) {
+        alert('Machine not in RUN state. \nCannot set Extra option.');
+        return;
+    }
+    let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x05, 0x00, 0x01, opt]); // Header + len = 1 + data
+    log('Select Extra ...', 'info');   
+    // Aggiungi CRC16
+    const crc = CRC16(msg);
+    const msg_with_crc = new Uint8Array(msg.length + crc.length);
+    msg_with_crc.set(msg);
+    msg_with_crc.set(crc, msg.length);
+    ack_received = false;
+    await rxCharacteristic.writeValue(msg_with_crc).then(() => {
+        log(`Select Extra command sent: ${msg_with_crc}`, 'info');
+        document.getElementById('optionExtra').style.color = 'blue';
+    }).catch(error => {
+        log(`Error sending Select Extra command: ${error}`, 'info');
+    });
+}
+
+
 async function downloadBlackList() {
     let recordNumber = 1;
     let msg = new Uint8Array([0xAA, 0x01, 0x00, 0x01, 0x09, 0x00, 0x02, 0x00, 0x00]); // Header + record number placeholder
@@ -636,7 +707,7 @@ function updateInfoDataFields(dataArray) {
     const paramVersion = document.getElementById('paramVersion');
 
     if (dataArray[5] == 0x00 && dataArray[6] == 0x20) { // data length 32 == 0x0020 bytes, false = Big-endian
-        log('Dati ricevuti corrispondono al formato atteso per Info (byte 5-6 == 0x0020)');
+        // log('Dati ricevuti corrispondono al formato atteso per Info (byte 5-6 == 0x0020)');
         if (query_infoID == 'radioGetInfoBoardSN') { // Board SN
             boardSN.value = getStringFromData(dataArray, 7, 39);
         } else if (query_infoID == 'radioGetInfoMachineSN') { // Machine SN
@@ -665,104 +736,228 @@ function handleCharacteristicValueChange(event, displayElement) {
     const decodedData = new TextDecoder().decode(receivedData); // Attempt to decode as text
     // displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')} (ASCII: "${decodedData}")`;
     displayElement.textContent = `0x${Array.from(receivedData).map(b => b.toString(16).padStart(2, '0')).join('')}`;
-    if ((query_periodica == false) && (fw_dowloading == false) && (blacklist_downloading == false)) {
-        log(`Received notification from ${event.target.uuid}: ${decodedData} (Raw: ${receivedData})`);
-    } else {
-        // formatted log status
+    // if ((query_periodica == false) && (fw_dowloading == false) && (blacklist_downloading == false)) {
+    //     log(`Received notification from ${event.target.uuid}: ${decodedData} (Raw: ${receivedData})`);
+    // } else {
+    //     // formatted log status
+    // }
+
+    const ctrl_func_code_word = (receivedData[3] << 8) | (receivedData[4]  & 0xFF);
+    switch (ctrl_func_code_word) {
+        case 0x0182: // Get Status ACK
+            updateStatusDataFields(receivedData);
+            // log('Get Status ACK received', 'info');
+            break;
+        case 0x0181: // Get FW Version ACK
+            updateFWVersionDataFields(receivedData);
+            log('Get FW Version ACK received', 'info');
+            break;
+        case 0x0187: // Get Info ACK
+            updateInfoDataFields(receivedData);
+            log('Get Info ACK received', 'info');
+            break;
+        case 0x0186: // Set Info ACK
+            log('Set Info ACK received', 'info');
+            break;
+        case 0x0280: // Start FW dowload ACK
+            log('Start FW dowload ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0281: // FW download ACK
+            // log('FW download ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0282: // FW Install ACK
+            log('FW Install ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0189: // Download Blacklist ACK
+            // log('Download Blacklist ACK received', 'info');
+            ack_received = true;
+            if (receivedData[7+9] >= 0x00 && receivedData[7+9] != 0xFF) {
+                blacklist_downloading = true;
+                let source = '';
+                if (receivedData[7+0] == 0x00) {
+                    source = 'BLE';
+                } else if (receivedData[7+0] == 0x01) {
+                    source = 'SCANNER'; 
+                }
+                const lotto = bytesToSInt(receivedData, 7+1, 4, false);
+                const code = bytesToSInt(receivedData, 7+5, 4, false);
+                log(`Source=${source}, Lot=${lotto}, Code=${code}`, 'info');
+            } else {
+                blacklist_downloading = false;
+            }
+            break;
+        case 0x0188: // Send Option ACK
+            log('Send Option ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0185: // Send Extra ACK
+            log('Send Extra ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0080: // Send Code ACK
+            log('Send Code ACK received', 'info');
+            ack_received = true;
+            break;
+        case 0x0081: // Cancel Code ACK
+            log('Cancel Code ACK received', 'info');
+            ack_received = true;
+            last_code_sent = new Uint8Array(0); // reset last code sent
+            break;
+        case 0x0180: // Reset Alarm ACK
+            log('Reset Alarm ACK received', 'info');
+            ack_received = true;
+            // reimposta radio button to default
+            document.getElementById('radioResetAlarms').checked = false;
+            break;
+        default:
+            log('Dati ricevuti NON corrispondono al formato atteso control-function code or NACK', 'info');
+            break;
     }
 
-    if (receivedData[3] == 0x01 && receivedData[4] == 0x82) {
-        updateStatusDataFields(receivedData);
-    } else if (receivedData[3] == 0x01 && receivedData[4] == 0x81) {
-        updateFWVersionDataFields(receivedData);
-    } else if (receivedData[3] == 0x01 && receivedData[4] == 0x87) {
-        updateInfoDataFields(receivedData);
-    } else if (receivedData[3] == 0x01 && receivedData[4] == 0x86) {
-        log('Set Info ACK received', 'info');
-    } else if (receivedData[3] == 0x02 && receivedData[4] == 0x80) {
-        log('Start FW dowload ACK received', 'info');
-        ack_received = true;
-    } else if (receivedData[3] == 0x02 && receivedData[4] == 0x81) {
-        // log('FW download ACK received', 'info');
-        ack_received = true;
-    } else if (receivedData[3] == 0x02 && receivedData[4] == 0x82) {
-        log('FW Install ACK received', 'info');
-        ack_received = true;
-    } else if (receivedData[3] == 0x01 && receivedData[4] == 0x89) {
-        // log('Download Blacklist ACK received', 'info');
-        ack_received = true;
-        if (receivedData[7+9] >= 0x00 && receivedData[7+9] != 0xFF) {
-            blacklist_downloading = true;
-            let source = '';
-            if (receivedData[7+0] == 0x00) {
-                source = 'BLE';
-            } else if (receivedData[7+0] == 0x01) {
-                source = 'SCANNER'; 
-            }
-            const lotto = bytesToSInt(receivedData, 7+1, 4, false);
-            const code = bytesToSInt(receivedData, 7+5, 4, false);
-            log(`Source=${source}, Lot=${lotto}, Code=${code}`, 'info');
-        } else {
-            blacklist_downloading = false;
-        }
-    } else if (receivedData[3] == 0x00 && receivedData[4] == 0x80) {
-        log('Send Code ACK received', 'info');
-        ack_received = true;
-    } else if (receivedData[3] == 0x00 && receivedData[4] == 0x81) {
-        log('Cancel Code ACK received', 'info');
-        ack_received = true;
-        last_code_sent = new Uint8Array(0); // reset last code sent
-    } else {
-        log('Dati ricevuti NON corrispondono al formato atteso control-function code or NACK', 'info');
-    }
+
+    // if (receivedData[3] == 0x01 && receivedData[4] == 0x82) {
+    //     updateStatusDataFields(receivedData);
+    //     // log('Get Status ACK received', 'info');
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x81) {
+    //     updateFWVersionDataFields(receivedData);
+    //     log('Get FW Version ACK received', 'info');
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x87) {
+    //     updateInfoDataFields(receivedData);
+    //     log('Get Info ACK received', 'info');
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x86) {
+    //     log('Set Info ACK received', 'info');
+    // } else if (receivedData[3] == 0x02 && receivedData[4] == 0x80) {
+    //     log('Start FW dowload ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x02 && receivedData[4] == 0x81) {
+    //     // log('FW download ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x02 && receivedData[4] == 0x82) {
+    //     log('FW Install ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x89) {
+    //     // log('Download Blacklist ACK received', 'info');
+    //     ack_received = true;
+    //     if (receivedData[7+9] >= 0x00 && receivedData[7+9] != 0xFF) {
+    //         blacklist_downloading = true;
+    //         let source = '';
+    //         if (receivedData[7+0] == 0x00) {
+    //             source = 'BLE';
+    //         } else if (receivedData[7+0] == 0x01) {
+    //             source = 'SCANNER'; 
+    //         }
+    //         const lotto = bytesToSInt(receivedData, 7+1, 4, false);
+    //         const code = bytesToSInt(receivedData, 7+5, 4, false);
+    //         log(`Source=${source}, Lot=${lotto}, Code=${code}`, 'info');
+    //     } else {
+    //         blacklist_downloading = false;
+    //     }
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x88) {
+    //     log('Send Option ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x85) {
+    //     log('Send Extra ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x00 && receivedData[4] == 0x80) {
+    //     log('Send Code ACK received', 'info');
+    //     ack_received = true;
+    // } else if (receivedData[3] == 0x00 && receivedData[4] == 0x81) {
+    //     log('Cancel Code ACK received', 'info');
+    //     ack_received = true;
+    //     last_code_sent = new Uint8Array(0); // reset last code sent
+    // } else if (receivedData[3] == 0x01 && receivedData[4] == 0x80) {
+    //     log('Reset Alarm ACK received', 'info');
+    //     ack_received = true;
+    //     // reimposta radio button to default
+    //     document.getElementById('radioResetAlarms').checked = false;
+    // } else {
+    //     log('Dati ricevuti NON corrispondono al formato atteso control-function code or NACK', 'info');
+    // }
 }
 
 
 // --- Event Listeners ---
+
 connectButton.addEventListener('click', connectDevice);
+
 disconnectButton.addEventListener('click', disconnectDevice);
+
 writeRxButton.addEventListener('click', () => writeToCharacteristic(rxCharacteristic, rxInput));
+
 queryForm.addEventListener('click', (event) => {
     const boardSN = document.getElementById('boardSN');
     const machineSN = document.getElementById('machineSN');
     const bleName = document.getElementById('bleName');
     const paramVersion = document.getElementById('paramVersion');
+    
+
     if (event.target.name === 'sceltaQuery') {
-        if ((event.target.id === 'radioGetStatus') || 
-        (event.target.id === 'radioGetVersion') || 
-        (event.target.id === 'radioGetInfoBoardSN') || 
-        (event.target.id === 'radioGetInfoMachineSN') || 
-        (event.target.id === 'radioGetInfoBLEName') || 
-        (event.target.id === 'radioGetInfoParamVersion')) {
-            rxInput.value = event.target.value;
-            query_infoID = event.target.id;
-        } else if (event.target.id === 'radioSetInfoBoardSN') {
-            rxInput.value = querySetInfo(boardSN.value, 0x00);
-        } else if (event.target.id === 'radioSetInfoMachineSN') {
-            rxInput.value = querySetInfo(machineSN.value, 0x01);
-        } else if (event.target.id === 'radioSetInfoBLEName') {
-            rxInput.value = querySetInfo(bleName.value, 0x02);
-        } else if (event.target.id === 'radioSetInfoParamVersion') {
-            rxInput.value = querySetInfo(paramVersion.value, 0x03);
-        } else if (event.target.id === 'fwUpdate') {
-            // rxInput.value = 'Contatta support@tooa.com, ti invieremo il file corretto!'; // Placeholder
-            alert('Per aggiornare il firmware hai bisogno di files con estensione *.bin; ' +
-                'contatta ff_service@tooa.com, scrivi nel messaggio tutte le informazioni che puoi ottenere ' +
-                'con i comandi Get in questa pagina (va bene uno screenshot se preferisci).\nTi invieremo noi il file corretto!\n\n' +                
-                'To update the firmware, you need files with the *.bin extension; ' +
-                'contact ff_service@tooa.com, and include in the message all the information you can obtain ' + 
-                "with the Get commands on this page (a screenshot is fine if you prefer).\nWe'll send you the correct file!");
+        switch(event.target.id) {
+            case 'radioGetStatus':
+                rxInput.value = event.target.value;
+                query_infoID = event.target.id;
+                // abilitazione periodic query
+                chekboxPeriodicQuery.disabled = false;
+                break;
+            case 'radioResetAlarms':
+            case 'radioGetVersion':
+            case 'radioGetInfoBoardSN':
+            case 'radioGetInfoMachineSN':
+            case 'radioGetInfoBLEName':
+            case 'radioGetInfoParamVersion':
+                rxInput.value = event.target.value;
+                query_infoID = event.target.id;
+                chekboxPeriodicQuery.disabled = true;
+                chekboxPeriodicQuery.checked = false;
+                // 1. **Crea un nuovo evento 'change'**
+                // L'uso di new Event('change', { bubbles: true }) è il modo moderno.
+                // L'opzione 'bubbles: true' permette all'evento di risalire nel DOM
+                // (non strettamente necessario in questo caso, ma buona pratica).
+                const changeEvent = new Event('change', { bubbles: true});
+                // 2. **Dispatch l'evento sull'elemento checkbox**
+                // Questo simula l'interazione dell'utente che cambia lo stato del checkbox.
+                chekboxPeriodicQuery.dispatchEvent(changeEvent);
+                break;
+            case 'radioSetInfoBoardSN':
+                rxInput.value = querySetInfo(boardSN.value, 0x00);
+                break;
+            case 'radioSetInfoMachineSN':
+                rxInput.value = querySetInfo(machineSN.value, 0x01);
+                break;
+            case 'radioSetInfoBLEName':
+                rxInput.value = querySetInfo(bleName.value, 0x02);
+                break;
+            case 'radioSetInfoParamVersion':
+                rxInput.value = querySetInfo(paramVersion.value, 0x03);
+                break;
+            case 'fwUpdate':
+                alert("To update the firmware, you need some specific binary file\n" +
+                      "Please contact: \n\nff_service@tooa.com \n\nWe'll send you the correct one!");
+                document.getElementById('fwUpdate').checked = false;
+                break;
+            default:
+                log('Nessuna query selezionata.', 'info');
+                break;
         }
     }
 });
+
 chekboxPeriodicQuery.addEventListener('change', (event) => {
     if(event.target.checked) {
-        log('Periodic Query abilitata. (Funzionalità da implementare)');
+        log('Periodic Query abilitata.');
         // Implement periodic query logic if needed
         query_periodica = true
         log('Machine Status Monitor')
         log('Status;Duration;Progress;ProbeT;EnvT;MotI;TECV;LoadsV;MotfI;MotDuty;MotV;Motw;MoPos;Flavour;Opt;Scan','monitor');
         periodicQueryInterval = setInterval(() => {
+            if (!rxCharacteristic) {
+                log('Caratteristica non disponibile per la periodic query.', 'info');
+                periodicQueryInterval = clearInterval(periodicQueryInterval);
+                return;
+            }
             if (rxInput.value) {
                 writeToCharacteristic(rxCharacteristic, rxInput);
                 writeRxButton.disabled = true; // Disable button to prevent manual sends during periodic query

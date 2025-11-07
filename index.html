@@ -15,23 +15,23 @@
             <h1 style="padding:20px;">BLE Monitor</h1>
         </div>
         <details>
-        <summary><strong>Informazioni</strong></summary>
-        <div style = "font-size: small; text-align: justify;">
-            <p><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
-                Assicurati di utilizzare un browser compatibile (es. Chrome o Edge o Chromium) e che il Bluetooth sia abilitato.
-                Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.</i>
-            </p>    
-            <ul>
-                <li><i>Windows: associa il dispositivo con <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
-                <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</li>
-                <li><i>Linux: connetti e associa il dispositivo, attiva nel browser i flags necessari con parole chiave "web" e "bluetooth" 
-                in <strong>about://flags</strong> quindi [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
-                <li><i>macOS: ... da provare ... </i></li>
-                <li><i>Android: [Connetti] >>> seleziona il dispositivo >>> [Accoppia], una notifica di pairing dovrebbe apparire automaticamente.
-                Eventualmente controlla la lista delle notifiche e selezionala, quindi segui le istruzioni a schermo.</i></li>
-                <li><i>iOS: come Android, ma funziona solo con il web browser <strong>Bluefy</strong></i></li>
-            </ul>
-        </div>
+            <summary><strong>Informazioni</strong></summary>
+            <div style = "font-size: small; text-align: justify;">
+                <p><i>Questa WebApp utilizza le Web Bluetooth API per dialogare con la macchina.<br>
+                    Assicurati di utilizzare un browser compatibile (es. Chrome o Edge o Chromium) e che il Bluetooth sia abilitato.
+                    Tra il dispositivo e la macchina è richiesto il "pairing" o associazione che avviene dal menù di sistema.</i>
+                </p>    
+                <ul>
+                    <li><i>Windows: associa il dispositivo con <strong>Impostazioni</strong> >>> <strong>Dispositivi</strong> >>> 
+                    <strong>Aggiungi dispositivo Bluetooth o di altro tipo</strong></i> >>> [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</li>
+                    <li><i>Linux: connetti e associa il dispositivo, attiva nel browser i flags necessari con parole chiave "web" e "bluetooth" 
+                    in <strong>about://flags</strong> quindi [Connetti] >>> seleziona il dispositivo >>> [Accoppia]</i></li>
+                    <li><i>macOS: ... da provare ... </i></li>
+                    <li><i>Android: [Connetti] >>> seleziona il dispositivo >>> [Accoppia], una notifica di pairing dovrebbe apparire automaticamente.
+                    Eventualmente controlla la lista delle notifiche e selezionala, quindi segui le istruzioni a schermo.</i></li>
+                    <li><i>iOS: come Android, ma funziona solo con il web browser <strong>Bluefy</strong></i></li>
+                </ul>
+            </div>
         </details>
 
         <div class="section" style ="display: flex; text-align: center;">
@@ -44,78 +44,97 @@
             <form id="QueryForm">
 
                 <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
-                <label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
-                    Get Status
-                    <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery">
-                    Periodic Query
-                </label>
-                <br>
-                        
+
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                    <label> Board SN: </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
-                    <label for="radioGetInfoBoardSN"> Get </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-00-..." id="radioSetInfoBoardSN">
-                    <label for="radioSetInfoBoardSN"> Set </label>
+                    <div style="flex-basis: 40%;">
+                        <label> Board Serial Number: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-00-E8-E7" id="radioGetInfoBoardSN">
+                        <label for="radioGetInfoBoardSN"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-00-..." id="radioSetInfoBoardSN">
+                        <label for="radioSetInfoBoardSN"> Set </label>
+                    </div>
                 </div>
                 <input type="text" id="boardSN" style ="width: 50%;" placeholder="decoded response">
                 <br>
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                    <label> Machine SN: </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
-                    <label for="radioGetInfoMachineSN"> Get </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-01-..." id="radioSetInfoMachineSN">
-                    <label for="radioSetInfoMachineSN"> Set </label>
+                    <div style="flex-basis: 40%;">
+                        <label> Machine Serial Number: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-01-28-26" id="radioGetInfoMachineSN">
+                        <label for="radioGetInfoMachineSN"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-01-..." id="radioSetInfoMachineSN">
+                        <label for="radioSetInfoMachineSN"> Set </label>
+                    </div>                    
                 </div>
                 <input type="text" id="machineSN" style ="width: 50%;" placeholder="decoded response">
                 <br>
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                    <label> BLE Name: </label> 
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
-                    <label for="radioGetInfoBLEName"> Get </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-02-..." id="radioSetInfoBLEName">
-                    <label for="radioSetInfoBLEName"> Set </label>
+                    <div style="flex-basis: 40%;">
+                        <label> Bluetooth Name: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;"> 
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-02-29-66" id="radioGetInfoBLEName">
+                        <label for="radioGetInfoBLEName"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-02-..." id="radioSetInfoBLEName">
+                        <label for="radioSetInfoBLEName"> Set </label>
+                    </div>
                 </div>        
                 <input type="text" id="bleName" style ="width: 50%;" placeholder="decoded response">
                 <br>
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                    <label> Parameter Ver.: </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
-                    <label for="radioGetInfoParamVersion"> Get </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-03-..." id="radioSetInfoParamVersion">
-                    <label for="radioSetInfoParamVersion"> Set </label>
+                    <div style="flex-basis: 40%;">
+                        <label> Setting Version: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-03-E9-A7" id="radioGetInfoParamVersion">
+                        <label for="radioGetInfoParamVersion"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-03-..." id="radioSetInfoParamVersion">
+                        <label for="radioSetInfoParamVersion"> Set </label>
+                    </div>
                 </div>
                 <input type="text" id="paramVersion" style ="width: 50%;" placeholder="decoded response">
                 <br>
-                <br>
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
-                    <label> Firmware Version. </label>
-                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
-                    <label for="radioGetVersion"> Get </label>
-                    <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
-                    <label for="fwUpdate"> Update </label>               
+                    <div style="flex-basis: 40%;">
+                        <label> Firmware Version: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-01-00-00-E7-40" id="radioGetVersion">
+                        <label for="radioGetVersion"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="filename.bin" id="fwUpdate">
+                        <label for="fwUpdate"> Update </label>
+                    </div>               
                 </div>
                 <input type="text" id="fwVersion" style ="width: 50%;" placeholder="decoded response">
                 <br>
+
                 <input type="file" id="fileInput" style="width: 60%;" single accept=".bin">
-                <progress id="progressBar" value="0" max="100" style="width: 30%;"></progress>
+                <progress id="progressBar" value="0" max="100" style="width: 50%;"></progress>
                 <span id="progressText">0%</span>
+                <br><br><br>
 
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-02-00-00-E7-B0" id="radioGetStatus">
+                    <label for="radioGetStatus"> Get Status </label>
+                    <input type="checkbox" name="periodicQuery" id="chekboxPeriodicQuery" disabled>
+                    <label for="chekboxPeriodicQuery"> Periodic Query </label>
+                    <input type="radio" name="sceltaQuery" value="AA-01-00-01-00-00-04-00-00-00-00-F7-44" id="radioResetAlarms">
+                    <label for="radioResetAlarms"> Reset Alarms </label>
+                </div>
+                <br>                      
             </form> 
-
-            <br>
-
+            
             <input type="text" id="rxInput" placeholder="Query to send ...">
             <button id="writeRxButton" class="action" disabled> Send </button>
             <div id="txValue" style="font-size: small; color: #007bff;">Response raw data ...</div>
-
             <br>
-            <hr>
 
             <form id="StatusForm">
                 <div class="campo-multiplo">
@@ -206,52 +225,70 @@
                     </div>                
                 </div>
             </form>
+            <br><br>
+
+            <div style = "display:flex; align-items: center; gap: 0px;">
+            <!--    <input type="text" id="statsOutput" style ="float: right; width: 30%;" placeholder="Flavor specific cycles ...">    -->
+                <select name="flavor" id="flavor" style = "width: 35%; height: 37px; border-radius: 5px;">
+                    <option value="0"> > Choose your flavor</option>
+                    <option value="1">Fior di latte</option>
+                    <option value="2">Crema</option>
+                    <option value="3">Nocciola</option>
+                    <option value="4">Gianduia</option>
+                    <option value="5">Cioccolato al Latte</option>
+                    <option value="6">Pistacchio</option>
+                    <option value="7">Pistacchio Vegano</option>
+                    <option value="8">Nocciola Vegana</option>
+                    <option value="9">Fondente</option>
+                    <option value="10">Riso e zafferano</option>
+                    <option value="11">Fragola</option>
+                    <option value="12">Limone</option>
+                    <option value="13">Arancia rossa</option>
+                    <option value="14">Spritz</option>
+                    <option value="15">Saporito</option>
+                    <option value="16">Bellini</option>
+                    <option value="17">Cappuccino</option>
+                    <option value="18">Rossini</option>
+                    <option value="19">Mandorla</option>
+                    <option value="20">Pesto ligure</option>
+                    <option value="21">5 colori della frutta</option>
+                    <option value="22">Frutto del cacao</option>
+                    <option value="23">Crema al mascarpone</option>
+                    <option value="24">Crema la passito</option>
+                    <option value="25">Marron glacé</option>
+                    <option value="26">Cioccolato Venezuela</option>
+                    <option value="27">Sorbetto verde</option>
+                    <option value="28">Sorbetto giallo</option>
+                    <option value="29">Sorbetto rosso</option>
+                    <option value="30">Skyr frutti rossi</option>
+                    <option value="31">Mango</option>
+                    <option value="32">Mandarino</option>
+                    <option value="33">Cioccolato caramel</option>
+                    <option value="50">Coco Plain</option>
+                    <option value="51">Coco Protein</option>
+                </select>
+
+                <button id="sendCodeButton" class="secondary" onclick="sendCode()" style = "width: 11%;">Send</button>
+    <!--             <label style = "width: 30%;">
+                    <input type="radio" name="optionTexture" value="AA-01-00-01-08-00-01-00" id="radioOptCreamy">
+                    Creamy
+                    <input type="radio" name="optionTexture" value="AA-01-00-01-08-00-01-01" id="radioOptSolid">
+                    Solid
+                    <input type="radio" name="optionTexture" value="AA-01-00-01-05-00-01-01" id="radioOptExtra">
+                    Extra
+                </label>        --> 
+
+                <button id="optionCreamy" onclick="sendOption(0x00)" style = "color: blue; background-color: #e9ecef;" >Creamy</button>
+                <button id="optionSolid" onclick="sendOption(0x01)" style = "color: black; background-color: #e9ecef;">Solid</button>
+                <button id="optionExtra" onclick="sendExtra(0x01)" style = "color: black; background-color: #e9ecef;">Extra</button>
+                <button id="cancelCodeButton" class="secondary" onclick="cancelCode()" style = "width: 11%;">Cancel</button>
+                <button id="getStatsButton" class="action" onclick="downloadBlackList()" style = "width: 20%;">Read Log</button>
+                <br>
+
+
+            </div>
         </fieldset>
 
-        <div class="section" style = "display:flex; align-items: center; gap: 0px;">
-        <!--    <input type="text" id="statsOutput" style ="float: right; width: 30%;" placeholder="Flavor specific cycles ...">    -->
-            <select name="flavor" id="flavor" style = "width: 35%; height: 37px; border-radius: 5px;">
-                <option value="0"> > Choose your flavor</option>
-                <option value="1">Fior di latte</option>
-                <option value="2">Crema</option>
-                <option value="3">Nocciola</option>
-                <option value="4">Gianduia</option>
-                <option value="5">Cioccolato al Latte</option>
-                <option value="6">Pistacchio</option>
-                <option value="7">Pistacchio Vegano</option>
-                <option value="8">Nocciola Vegana</option>
-                <option value="9">Fondente</option>
-                <option value="10">Riso e zafferano</option>
-                <option value="11">Fragola</option>
-                <option value="12">Limone</option>
-                <option value="13">Arancia rossa</option>
-                <option value="14">Spritz</option>
-                <option value="15">Saporito</option>
-                <option value="16">Bellini</option>
-                <option value="17">Cappuccino</option>
-                <option value="18">Rossini</option>
-                <option value="19">Mandorla</option>
-                <option value="20">Pesto ligure</option>
-                <option value="21">5 colori della frutta</option>
-                <option value="22">Frutto del cacao</option>
-                <option value="23">Crema al mascarpone</option>
-                <option value="24">Crema la passito</option>
-                <option value="25">Marron glacé</option>
-                <option value="26">Cioccolato Venezuela</option>
-                <option value="27">Sorbetto verde</option>
-                <option value="28">Sorbetto giallo</option>
-                <option value="29">Sorbetto rosso</option>
-                <option value="30">Skyr frutti rossi</option>
-                <option value="31">Mango</option>
-                <option value="32">Mandarino</option>
-                <option value="33">Cioccolato caramel</option>
-                <option value="50">Coco Plain</option>
-                <option value="51">Coco Protein</option>
-            </select>
-            <button id="sendCodeButton" class="secondary" onclick="sendCode()" style = "width: 20%">Send Code</button>
-            <button id="cancelCodeButton" class="secondary" onclick="cancelCode()" style = "width: 20%">Cancel Code</button>
-            <button id="getStatsButton" class="action" onclick="downloadBlackList()" style = "width: 20%">Read Log</button>
-        </div>
 
         <div class="section">
             <h2>
