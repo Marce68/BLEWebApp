@@ -43,7 +43,7 @@
         <fieldset id = "fieldsetQuery" class = "section" disabled>
             <form id="QueryForm">
 
-                <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right;width:40%;height:40%;">
+                <img src="MproBlackMatt2-removebg-preview.png" alt="Milano Pro Black Matt" style="float:right; width:40%; height:40%;">
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                     <div style="flex-basis: 40%;">
@@ -103,6 +103,48 @@
 
                 <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
                     <div style="flex-basis: 40%;">
+                        <label> BLE Address: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-04-2B-E6" id="radioGetInfoBLEAddress">
+                        <label for="radioGetInfoBLEAddress"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-04-..." id="radioSetInfoBLEAddress">
+                        <label for="radioSetInfoBLEAddress"> Set </label>
+                    </div>
+                </div>
+                <input type="text" id="BLEAddress" style ="width: 50%;" placeholder="decoded response (work in progress)" disabled>
+                <br>
+
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <div style="flex-basis: 40%;">
+                        <label> WiFi SSID: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-05-EB-27" id="radioGetInfoSSID">
+                        <label for="radioGetInfoSSID"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-04-..." id="radioSetInfoSSID">
+                        <label for="radioSetInfoSSID"> Set </label>
+                    </div>
+                </div>
+                <input type="text" id="SSID" style ="width: 50%;" placeholder="decoded response (work in progress)" disabled>
+                <br>
+
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <div style="flex-basis: 40%;">
+                        <label> WiFi Password: </label>
+                    </div>
+                    <div style="display: flex; align-items: center; flex-basis: 60%;">
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-01-06-EA-67" id="radioGetInfoPassword">
+                        <label for="radioGetInfoPassword"> Get </label>
+                        <input type="radio" name="sceltaQuery" value="AA-01-00-01-07-00-21-05-..." id="radioSetInfoPassword">
+                        <label for="radioSetInfoPassword"> Set </label>
+                    </div>
+                </div>
+                <input type="text" id="passWord" style ="width: 50%;" placeholder="decoded response (work in progress)" disabled>
+                <br>
+
+                <div style="display: flex; align-items: center; gap: 0px; width: 60%;">
+                    <div style="flex-basis: 40%;">
                         <label> Firmware Version: </label>
                     </div>
                     <div style="display: flex; align-items: center; flex-basis: 60%;">
@@ -135,7 +177,7 @@
             <button id="writeRxButton" class="action" disabled> Send </button>
             <div id="txValue" style="font-size: small; color: #007bff;">Response raw data ...</div>
             <br>
-
+            
             <form id="StatusForm">
                 <div class="campo-multiplo">
                     <div class="input-group">
@@ -225,7 +267,13 @@
                     </div>                
                 </div>
             </form>
-            <br><br>
+            <br>
+            
+            <div style="text-align: center; width: 100%;">
+                <span id="progCycleText">Cycle progress ...</span>
+                <progress id="progCycleBar" value="0" max="100" style="width: 80%; display: block; margin: 5px auto 0 auto;"></progress>
+            </div>
+            <br>
 
             <div style = "display:flex; align-items: center; gap: 0px;">
             <!--    <input type="text" id="statsOutput" style ="float: right; width: 30%;" placeholder="Flavor specific cycles ...">    -->
@@ -269,16 +317,7 @@
                 </select>
 
                 <button id="sendCodeButton" class="secondary" onclick="sendCode()" style = "width: 11%;">Send</button>
-    <!--             <label style = "width: 30%;">
-                    <input type="radio" name="optionTexture" value="AA-01-00-01-08-00-01-00" id="radioOptCreamy">
-                    Creamy
-                    <input type="radio" name="optionTexture" value="AA-01-00-01-08-00-01-01" id="radioOptSolid">
-                    Solid
-                    <input type="radio" name="optionTexture" value="AA-01-00-01-05-00-01-01" id="radioOptExtra">
-                    Extra
-                </label>        --> 
-
-                <button id="optionCreamy" onclick="sendOption(0x00)" style = "color: blue; background-color: #e9ecef;" >Creamy</button>
+                 <button id="optionCreamy" onclick="sendOption(0x00)" style = "color: blue; background-color: #e9ecef;" >Creamy</button>
                 <button id="optionSolid" onclick="sendOption(0x01)" style = "color: black; background-color: #e9ecef;">Solid</button>
                 <button id="optionExtra" onclick="sendExtra(0x01)" style = "color: black; background-color: #e9ecef;">Extra</button>
                 <button id="cancelCodeButton" class="secondary" onclick="cancelCode()" style = "width: 11%;">Cancel</button>

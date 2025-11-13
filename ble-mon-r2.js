@@ -21,14 +21,31 @@ const txValueDisplay = document.getElementById('txValue');
 const connectionStatusDisplay = document.getElementById('connectionStatus');
 const logDiv = document.getElementById('log');
 
+// --- Global Variables ---
 let machine_status = 99;
-let query_periodica = false;
-let query_infoID = '';
-let ack_received = false;
-let fw_dowloading = false;
-let blacklist_downloading = false;
-// let last_code_sent = [];
-let last_code_sent = new Uint8Array(0);
+let machine_status_saved = 99; // Salva lo stato macchina precedente necessario e per la gestione della progress bar
+let start_time = 0;
+let actual_time = 0;
+let cycle_time = 0;
+let cycle_time_elapsed = 0;
+let cycle_time_saved = 0;
+let cycle_time_elapsed_saved = 0;
+let progress = 0;
+let extra_time = false;
+// --- Variables for status monitoring and progress bar management---
+// SS       # SystemState, current --> machine_status
+// CT	    # CycleTime, current 
+// CTE	    # CycleTimeElapsed, current
+// CT_0	    # CycleTime_0, saved upon event
+// CTE_0	# CycleTimeElapsed_0, saved upon event
+// t_0	    # Start time, computed
+
+let query_periodica = false; // Flag per query periodica dello stato macchina
+let query_infoID = ''; // Variabile per memorizzare l'ID dell'informazione richiesta e processare correttamente la risposta
+let ack_received = false; // Flag per ACK ricevuto e chiusura della transazione
+let fw_dowloading = false; // Flag per il download del firmware
+let blacklist_downloading = false; // Flag per il download della blacklist
+let last_code_sent = new Uint8Array(0); // Necessario per la funzione cancelCode
 
 // --- Helper Functions ---
 function log(message, type = 'info') {
@@ -39,7 +56,7 @@ function log(message, type = 'info') {
         logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
     } else if (type == 'monitor') {
         // logDiv.innerHTML += `<p>${message}</p>`;
-        logDiv.innerHTML += `${message}\r\n`;
+        logDiv.innerHTML += `${message}\n`;
         logDiv.scrollTop = logDiv.scrollHeight; // Scroll to bottom
     }
     console.log(message);
@@ -181,7 +198,19 @@ function updateStatusDataFields(dataArray) {
     const motorSwitchPosition = document.getElementById('motorSwitchPosition');
     const scannerConnected = document.getElementById('scannerConnected');
     const flavourCode = document.getElementById('flavourCode');
-    const option = document.getElementById('option');           
+    const option = document.getElementById('option');
+    const progCycleBar = document.getElementById('progCycleBar');
+    const progCycleText = document.getElementById('progCycleText');
+    const decoded_status = {
+        0: 'WAITING', // BLOCKED
+        1: 'READY',
+        2: 'PRODUCTION (std time)',
+        3: 'PRODUCTION FINISHED (std time)',
+        4: 'PAUSED', // PRODUCTION INTERRUPTED
+        5: 'ERROR',
+        18: 'PRODUCTION (ext time)',
+        19: 'PRODUCTION FINISHED (ext time)'
+    };
     let strStatusMonitor = '';
 
     if (dataArray[5] == 0x00 && dataArray[6] >= 0x22) { // 0x0022 == 34 <= data length <= 37 == 0x0025 bytes, false = Big-endian
@@ -249,7 +278,67 @@ function updateStatusDataFields(dataArray) {
         log('Dati ricevuti NON corrispondono al formato atteso per la versione (byte 5-6 != 0x0025)', 'info');
         return;
     }
+    
+    // SYSTEM_STATUS
+    // 0x00 == 0 == Blocked
+    // 0x01 == 1 == Ready for Production
+    // 0x02 == 2 == Production (std time)
+    // 0x12 == 18 == Production (ext time)
+    // 0x03 == 3 == Production finished (std time)
+    // 0x13 == 19 == Production finished (ext time)
+    // 0x04 == 4 == Production interrupted
+    // 0x05 == 5 == Error
 
+    // Polling_GetStatus (
+    // 	EventCatch:
+    // 	SS: 1-->2 or 3-->18 {   // SS = SystemState, current --> machine_status
+    //  		t_0 = 10        // t_0 = Start time, computed
+    //  		CT_0 = CT       // CT_0 = CycleTime_0, saved upon event; CT	= CycleTime, current 
+    //  		CTE_0 = CTE     // CTE_0 = CycleTimeElapsed_0, saved upon event; CTE = CycleTimeElapsed, current
+    // 	} SS: 2-->4 or 18-->4 {
+    //  		t_0 = CTE
+    // 	} SS: 4-->2 or 4-->18 {
+    //  		CTE_0 = CTE
+    // 	} if (SS == 2) or (SS ==18) {
+    // 		t = t_0 + (CTE - CTE_0)
+    // 		p = t/CT_0
+    // 		AggiornaProgressBar(p)
+    // 	})
+
+    // Progress bar management
+    if ((machine_status_saved == 1) && (machine_status == 2) || (machine_status_saved == 3) && (machine_status == 18)) {
+        // Transizione da READY a PRODUCTION o da PRODUCTION FINISHED a PRODUCTION (extra time)
+        start_time = 1;
+        cycle_time_saved = Number(cycleTimeDuration.value);
+        cycle_time_elapsed_saved = Number(cycleTimeElapsed.value);
+    } else if ((machine_status_saved == 2) && (machine_status == 4) || (machine_status_saved == 18) && (machine_status == 4)) {
+        // Transizione da PRODUCTION a PAUSED
+        start_time = Number(cycleTimeElapsed.value);
+    } else if ((machine_status_saved == 4) && (machine_status == 2) || (machine_status_saved == 4) && (machine_status == 18)) {
+        // Transizione da PAUSED a PRODUCTION
+        cycle_time_elapsed_saved = Number(cycleTimeElapsed.value);
+    } else if ((machine_status_saved == 2) || (machine_status_saved == 18)) {
+        // Stato PRODUCTION
+        actual_time = start_time + (cycle_time_elapsed - cycle_time_elapsed_saved);
+        progress = Math.round(100 * (actual_time / cycle_time_saved));
+    } else if ((machine_status == 0) || (machine_status == 1)) {
+        // Altri stati ...
+        progress = 0;
+        extra_time = false;        
+    }
+    progCycleText.textContent = decoded_status[machine_status] + ` - Progress: ${progress} %`;
+    progCycleBar.value = progress;
+    machine_status_saved = machine_status; // Aggiorna lo stato macchina salvato
+    cycle_time_elapsed = cycleTimeElapsed.value; // Aggiorna il tempo ciclo trascorso
+
+    if ((machine_status == 2) && (extra_time == true)) {
+        if (Number(option.value) & 0x01) {
+            cycle_time_saved = cycle_time_saved + 180; // Aggiungi 180 seconds   
+        } else {
+            cycle_time_saved = cycle_time_saved + 120; // Aggiungi 120 seconds
+        }
+        extra_time = false;
+    }
 }
 
 function getStringFromData(dataArray, offset, length) {
@@ -705,6 +794,10 @@ function updateInfoDataFields(dataArray) {
     const machineSN = document.getElementById('machineSN');
     const bleName = document.getElementById('bleName');
     const paramVersion = document.getElementById('paramVersion');
+    const bleAddress = document.getElementById('BLEAddress');
+    const SSID = document.getElementById('SSID');
+    const passWord = document.getElementById('passWord');
+
 
     if (dataArray[5] == 0x00 && dataArray[6] == 0x20) { // data length 32 == 0x0020 bytes, false = Big-endian
         // log('Dati ricevuti corrispondono al formato atteso per Info (byte 5-6 == 0x0020)');
@@ -716,6 +809,12 @@ function updateInfoDataFields(dataArray) {
             bleName.value = getStringFromData(dataArray, 7, 39);
         } else if (query_infoID == 'radioGetInfoParamVersion') { // Parameter Version
             paramVersion.value = getStringFromData(dataArray, 7, 39);
+        } else if (query_infoID == 'radioGetInfoBLEAddress') { // BLE Address
+            bleAddress.value = getStringFromData(dataArray, 7, 39);
+        } else if (query_infoID == 'radioGetInfoSSID') { // WiFi SSID
+            SSID.value = getStringFromData(dataArray, 7, 39);
+        } else if (query_infoID == 'radioGetInfoPassword') { // WiFi Password
+            passWord.value = getStringFromData(dataArray, 7, 39);
         } else {
             log('Dati ricevuti NON corrispondono al formato atteso per Info (byte 4 != 0x00/01/02/03)', 'info');
             return;
@@ -795,6 +894,7 @@ function handleCharacteristicValueChange(event, displayElement) {
             break;
         case 0x0185: // Send Extra ACK
             log('Send Extra ACK received', 'info');
+            extra_time = true;
             ack_received = true;
             break;
         case 0x0080: // Send Code ACK
@@ -908,6 +1008,9 @@ queryForm.addEventListener('click', (event) => {
             case 'radioGetInfoMachineSN':
             case 'radioGetInfoBLEName':
             case 'radioGetInfoParamVersion':
+            case 'radioGetInfoBLEAddress':
+            case 'radioGetInfoSSID':
+            case 'radioGetInfoPassword':
                 rxInput.value = event.target.value;
                 query_infoID = event.target.id;
                 chekboxPeriodicQuery.disabled = true;
@@ -932,6 +1035,15 @@ queryForm.addEventListener('click', (event) => {
                 break;
             case 'radioSetInfoParamVersion':
                 rxInput.value = querySetInfo(paramVersion.value, 0x03);
+                break;
+            case 'radioSetInfoBLEAddress':
+                rxInput.value = querySetInfo(paramVersion.value, 0x04);
+                break;
+            case 'radioSetInfoSSID':
+                rxInput.value = querySetInfo(paramVersion.value, 0x05);
+                break;
+            case 'radioSetInfoPassword':
+                rxInput.value = querySetInfo(paramVersion.value, 0x06);
                 break;
             case 'fwUpdate':
                 alert("To update the firmware, you need some specific binary file\n" +

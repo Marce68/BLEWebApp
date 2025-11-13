@@ -24,6 +24,7 @@ async function connectDevice() {
         log('Richiesta selezione dispositivo Bluetooth...');
         device = await navigator.bluetooth.requestDevice({
             filters: [{ services: [XPRESS_SERVICE_UUID] }],
+            optionalServices: ['device_information'],
             // optionalServices: [ // Add any other services if needed
             //     'generic_access',
             // ]
@@ -32,9 +33,25 @@ async function connectDevice() {
 
         device.addEventListener('gattserverdisconnected', onDisconnected);
 
-        log('Connessione al server GATT...');
+        log('Connessione al server GATT...', 'info');
         const server = await device.gatt.connect();
-        log('Connesso al server GATT.');
+        log('Connesso al server GATT.', 'info');
+
+        // --- Lettura della Revisione Firmware ---
+        // 2. Ottieni il Servizio Informazioni Dispositivo (0x180A)
+        const service = await server.getPrimaryService('device_information');
+        
+        // 3. Ottieni la Caratteristica della Revisione Firmware (0x2A26)
+        const characteristic = await service.getCharacteristic('firmware_revision_string');
+        
+        // 4. Leggi e decodifica il valore
+        const value = await characteristic.readValue();
+        const decoder = new TextDecoder('utf-8');
+        const firmwareRevisionString = decoder.decode(value);
+
+        log(`Dispositivo connesso: ${device.name}`, 'info');
+        log(`Stringa Revisione Firmware: **${firmwareRevisionString}**`, 'info');
+        const containsSTM32 = firmwareRevisionString.includes("STM32");
 
         log('Ottenimento del servizio Xpress...');
         xpressService = await server.getPrimaryService(XPRESS_SERVICE_UUID);
@@ -45,26 +62,27 @@ async function connectDevice() {
         rxCharacteristic = await xpressService.getCharacteristic(XPRESS_RX_CHARACTERISTIC_UUID);
         modeCharacteristic = await xpressService.getCharacteristic(XPRESS_MODE_CHARACTERISTIC_UUID);
 
-        // --- Gestione del pairing/bonding ---
-        // Alcuni dispositivi richiedono che il pairing sia completato
-        // prima di poter accedere a determinate caratteristiche protette.
-        // Ecco come possiamo forzare il pairing se necessario.
-        // Esempio di caratteristica protetta che richiede pairing ... tentiamo di forzare il pairing
-        const protectedCharacteristic = modeCharacteristic; // Sostituisci con la caratteristica effettivamente protetta
-        try {
-            // Tenta di leggere la caratteristica protetta
-            // Questo FORZA la richiesta di sicurezza
-            await protectedCharacteristic.readValue();
-            // Se la lettura riesce, significa che il pairing (e l'eventuale bonding)
-            // sono stati completati con successo dal sistema operativo.
-            log('Pairing riuscito, caratteristica letta.', 'info');
-        } catch (error) {
-            // Se la lettura fallisce (ad es. per Insufficient Authentication)
-            // e lo stack Bluetooth del sistema operativo è ben implementato,
-            // la procedura di pairing/dialogo utente si avvierà qui.
-            log('Errore durante l\'accesso alla caratteristica protetta. Potrebbe essere avviato il pairing.', 'info');
-            // A questo punto, il sistema operativo dovrebbe mostrare il popup di pairing.
-            // La webapp si ricollegherà o riproverà l'accesso una volta completato.
+        // --- Gestione del pairing/bonding per dispositivi non STM32 ---
+        // Se si tenta di forzare il pairing con STM32WB... si ottiene la disconnessione immediata!
+        if (!containsSTM32) {
+            // --- Gestione del pairing/bonding ---
+            // I dispositivi BGX richiedono il pairing prima di poter accedere alle caratteristiche protette.
+            // Tentiamo di forzare il pairing leggendo una caratteristica protetta.
+            const protectedCharacteristic = modeCharacteristic;
+            try {
+                // Tenta di leggere la caratteristica protetta, questo FORZA la richiesta di sicurezza
+                await protectedCharacteristic.readValue();
+                // Se la lettura riesce, significa che il pairing (e l'eventuale bonding)
+                // sono stati completati con successo dal sistema operativo.
+                log('Pairing riuscito, caratteristica letta.', 'info');
+            } catch (error) {
+                // Se la lettura fallisce (ad es. per Insufficient Authentication)
+                // e lo stack Bluetooth del sistema operativo è ben implementato,
+                // la procedura di pairing/dialogo utente si avvierà qui.
+                log('Errore durante l\'accesso alla caratteristica protetta. Potrebbe essere avviato il pairing.', 'info');
+                // A questo punto, il sistema operativo dovrebbe mostrare il popup di pairing.
+                // La webapp si ricollegherà o riproverà l'accesso una volta completato.
+            }
         }
 
         // log('Caratteristiche ottenute: TX, RX, MODE.');
@@ -106,7 +124,7 @@ function onDisconnected(event) {
     // Clean up characteristic references
     txCharacteristic = null;
     rxCharacteristic = null;
-    // modeCharacteristic = null;
+    modeCharacteristic = null;
     xpressService = null;
     device = null;
 }
