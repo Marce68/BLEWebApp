@@ -1,4 +1,4 @@
-This Web App has been developed for service and technical assistance.
+This Web App has been developed for service and technical assistance for TooA ice cream machines "Milano" and "Milano Pro".
 
 It uses Bluetooth Web Api, so it works in several web browser like Chrome and Edge running in PC, Mac, Linux, Android, ...
 
