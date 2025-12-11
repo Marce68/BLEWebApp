@@ -6,4 +6,5 @@ Step 2 - Update the machine to E1.4.000.bin firmware version
 
 Step 3 - Update the machine to the Bootloader_v2.bin version
 
-Step 4 - Update the machine to 
+Step 4 - Update the machine to M2.6.000 (Milano Pro) or S2.6.000 (Milano Classic)
+
