@@ -201,6 +201,15 @@ function updateStatusDataFields(dataArray) {
     const option = document.getElementById('option');
     const progCycleBar = document.getElementById('progCycleBar');
     const progCycleText = document.getElementById('progCycleText');
+    // SYSTEM_STATUS
+    // 0x00 == 0 == Blocked
+    // 0x01 == 1 == Ready for Production
+    // 0x02 == 2 == Production (std time)
+    // 0x12 == 18 == Production (ext time)
+    // 0x03 == 3 == Production finished (std time)
+    // 0x13 == 19 == Production finished (ext time)
+    // 0x04 == 4 == Production interrupted
+    // 0x05 == 5 == Error
     const decoded_status = {
         0: 'WAITING', // BLOCKED
         1: 'READY',
@@ -278,17 +287,8 @@ function updateStatusDataFields(dataArray) {
         log('Dati ricevuti NON corrispondono al formato atteso per la versione (byte 5-6 != 0x0025)', 'info');
         return;
     }
-    
-    // SYSTEM_STATUS
-    // 0x00 == 0 == Blocked
-    // 0x01 == 1 == Ready for Production
-    // 0x02 == 2 == Production (std time)
-    // 0x12 == 18 == Production (ext time)
-    // 0x03 == 3 == Production finished (std time)
-    // 0x13 == 19 == Production finished (ext time)
-    // 0x04 == 4 == Production interrupted
-    // 0x05 == 5 == Error
 
+    // Progress bar management
     // Polling_GetStatus (
     // 	EventCatch:
     // 	SS: 1-->2 or 3-->18 {   // SS = SystemState, current --> machine_status
@@ -304,11 +304,9 @@ function updateStatusDataFields(dataArray) {
     // 		p = t/CT_0
     // 		AggiornaProgressBar(p)
     // 	})
-
-    // Progress bar management
     if ((machine_status_saved == 1) && (machine_status == 2) || (machine_status_saved == 3) && (machine_status == 18)) {
         // Transizione da READY a PRODUCTION o da PRODUCTION FINISHED a PRODUCTION (extra time)
-        start_time = 1;
+        start_time = 1; // Inizia il conteggio del tempo dal secondo '1'
         cycle_time_saved = Number(cycleTimeDuration.value);
         cycle_time_elapsed_saved = Number(cycleTimeElapsed.value);
     } else if ((machine_status_saved == 2) && (machine_status == 4) || (machine_status_saved == 18) && (machine_status == 4)) {
@@ -320,14 +318,29 @@ function updateStatusDataFields(dataArray) {
     } else if ((machine_status_saved == 2) || (machine_status_saved == 18)) {
         // Stato PRODUCTION
         actual_time = start_time + (cycle_time_elapsed - cycle_time_elapsed_saved);
-        progress = Math.round(100 * (actual_time / cycle_time_saved));
+        // progress = Math.round(100 * (actual_time / cycle_time_saved));
+        if (cycle_time_saved == 0) {
+            progress = 900; // Evita divisione per zero
+        } else {
+            progress = 100 * (actual_time / cycle_time_saved);
+        }
     } else if ((machine_status == 0) || (machine_status == 1)) {
         // Altri stati ...
         progress = 0;
         extra_time = false;        
     }
-    progCycleText.textContent = decoded_status[machine_status] + ` - Progress: ${progress} %`;
-    progCycleBar.value = progress;
+    
+    if (progress == 900) {
+        progCycleBar.value = 0;
+        progCycleText.textContent = decoded_status[machine_status] + ` - Progress: N/A`;
+    } else if (progress > 100) { // Controllo necessario per fw Elemaster con bug sul calcolo del tempo residuo
+        progCycleBar.value = 100;
+        progCycleText.textContent = 'Completing cycle ... - Progress: 100 %';
+    } else {
+        progCycleBar.value = progress;
+        progCycleText.textContent = decoded_status[machine_status] + ` - Progress: ${Math.round(progress)} %`;
+    }
+    
     machine_status_saved = machine_status; // Aggiorna lo stato macchina salvato
     cycle_time_elapsed = cycleTimeElapsed.value; // Aggiorna il tempo ciclo trascorso
 
@@ -504,6 +517,7 @@ async function queryUpdateFW (fw) {
     let i = 0;
     const download_fw_image = new Uint8Array([0xAA, 0x01, 0x00, 0x02, 0x01, 0x00, 0x82]);
 
+    aggiornaProgress(0);
     while (i < num_pkt) {
         if (ack_received === true) {
             const data = padded_fw.slice(i * 128, (i + 1) * 128);
@@ -606,7 +620,7 @@ async function sendCode() {
     // Map flavor code to cluster code
     const fcMap = {
     "0": "4",
-    "1": "1",
+    "1": "3",
     "2": "1",
     "3": "1",
     "4": "1",
@@ -615,7 +629,7 @@ async function sendCode() {
     "7": "1",
     "8": "1",
     "9": "1",
-    "10": "1",
+    "10": "5",
     "11": "2",
     "12": "2",
     "13": "2",
@@ -640,7 +654,8 @@ async function sendCode() {
     "32": "2",
     "33": "1",
     "50": "6",
-    "51": "7"
+    "51": "7",
+    "52": "7"
     };
     const clusterCode = fcMap[flavorCode];
 
