@@ -119,6 +119,9 @@ function updateConnectionStatus(isConnected) {
         // readModeButton.disabled = false;
         // writeModeButton.disabled = false;
         document.getElementById('fieldsetQuery').disabled = false;
+        // Leggere la versione FW della macchina per decidere se attivare subito la query periodica dello stato
+        radioGetVersion.click();
+        writeRxButton.click();
     } else {
         connectionStatusDisplay.textContent = 'Disconnesso';
         connectionStatusDisplay.className = 'status disconnected';
@@ -865,6 +868,15 @@ function handleCharacteristicValueChange(event, displayElement) {
         case 0x0181: // Get FW Version ACK
             updateFWVersionDataFields(receivedData);
             log('Get FW Version ACK received', 'info');
+            const fwVersion = document.getElementById('fwVersion');
+            log(`FW Version: ${fwVersion.value}`, 'info');
+            if (['E', 'S', 'M', 'A', 'B'].includes(fwVersion.value[0]) === false) {
+                // FW Elemaster: attivare la richiesta periodica di stato
+                radioGetStatus.click();
+                writeRxButton.click();
+                chekboxPeriodicQuery.click();
+                query_periodica = true;
+            }
             break;
         case 0x0187: // Get Info ACK
             updateInfoDataFields(receivedData);
@@ -1111,6 +1123,14 @@ fwFileInput.addEventListener('change', async (event) => {
         const fw_uint8Array = new Uint8Array(arrayBuffer);
         log(`Contenuto del file (primi 64 bytes): 0x${Array.from(fw_uint8Array.slice(0, 64)).map(b => b.toString(16).padStart(2, '0')).join('-')}`, 'info');
         // Further processing of the firmware file can be done here
+
+        // If periodic query is active, disable it before starting FW update
+        if (query_periodica) {
+            query_periodica = false;
+            chekboxPeriodicQuery.click();
+            periodicQueryInterval = clearInterval(periodicQueryInterval);
+        }
+        
         queryUpdateFW(fw_uint8Array);
     } else {
         log('Nessun file selezionato.', 'info');
