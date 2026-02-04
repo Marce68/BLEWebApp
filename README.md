@@ -9,6 +9,6 @@ If you have an iPhone it will work only with the Bluefy web browser
 
 Some comments in the code are in English but most of them are in Italian
 
-You can use this code also as a basis to develop your App
+You can use this code, under MIT License, also as a basis to develop your own App
 
 Enjoy!
