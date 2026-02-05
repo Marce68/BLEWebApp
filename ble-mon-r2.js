@@ -1145,3 +1145,17 @@ fwFileInput.addEventListener('change', async (event) => {
 clearDataFields();
 updateConnectionStatus(false);
 log('Pronto per la connessione. Assicurati che Web Bluetooth sia abilitato nel tuo browser e che il dispositivo sia in modalità advertising.');
+
+////////////PWA Service Worker////////////
+// Registrazione Service Worker per PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/BLEWebApp/sw.js')
+      .then(registration => {
+        console.log('Service Worker registrato:', registration.scope);
+      })
+      .catch(error => {
+        console.log('Errore registrazione SW:', error);
+      });
+  });
+}

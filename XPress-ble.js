@@ -14,6 +14,7 @@ let modeCharacteristic;
 
 // --- Bluetooth Functions ---
 async function connectDevice() {
+
     if (!navigator.bluetooth) {
         log('Web Bluetooth non supportato in questo browser.', 'info');
         alert('Spiacente, il tuo browser non supporta Web Bluetooth. Prova Chrome.');
@@ -127,6 +128,8 @@ function onDisconnected(event) {
     modeCharacteristic = null;
     xpressService = null;
     device = null;
+
+    location.reload(); // TEMP: force reload to reset state before connecting again
 }
 
 async function disconnectDevice() {
