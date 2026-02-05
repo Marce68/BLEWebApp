@@ -3,7 +3,7 @@
 This Web App has been developed for service and technical assistance for TooA ice cream machines "Milano" and "Milano Pro".
 You can access it at the following address: https://marce68.github.io/BLEWebApp/
 
-It uses Bluetooth Web Api, so it works in several web browser like Chrome and Edge running in PC, Mac, Linux, Android, ...
+It uses Bluetooth Web Api, so it works in several web browser like Chrome, Edge and Chromium running in PC, Mac, Linux, Android, ...
 
 If you have an iPhone it will work only with the **Bluefy** web browser
 
